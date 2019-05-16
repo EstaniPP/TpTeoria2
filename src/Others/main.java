@@ -1,5 +1,6 @@
 package Others;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import Huffman.Huffman;
@@ -14,10 +15,15 @@ public class main {
 				i++;
 			}
 			
-			HashMap<Integer, Integer> huffmanMap = Huffman.getHuffman(probabilities);
+			HashMap<Integer, ArrayList<Integer>> huffmanMap = Huffman.getHuffman(probabilities);
 			
-			for(Entry<Integer, Integer> n: huffmanMap.entrySet()) {
-				System.out.println("Codigo de "+n.getKey()+" es "+ n.getValue());
+			for(Entry<Integer, ArrayList<Integer>> n: huffmanMap.entrySet()) {
+				System.out.println("Codigo de "+n.getKey());
+				for(int j=0;j<n.getValue().size();j++) {
+					System.out.print(n.getValue().get(j));
+				}
+				System.out.println("");
+				
 			}
 	}
 }

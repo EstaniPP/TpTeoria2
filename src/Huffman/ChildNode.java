@@ -1,5 +1,6 @@
 package Huffman;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ChildNode extends Node{
@@ -8,16 +9,9 @@ public class ChildNode extends Node{
 		this.prob = prob;
 	}
 	
-	public HashMap<Integer, Integer> getCode() {
-		HashMap<Integer, Integer> codes=new HashMap<Integer, Integer>();
-		codes.put(name,1);
-		return codes;
-	}
-	
-	@Override
-	protected HashMap<Integer, Integer> getCode(Integer lastcode, int code) {
-		HashMap<Integer, Integer> codes=new HashMap<Integer, Integer>();
-		codes.put(name,code+10*lastcode);
+	public HashMap<Integer, ArrayList<Integer>> getCode() {
+		HashMap<Integer, ArrayList<Integer>> codes=new HashMap<Integer, ArrayList<Integer>>();
+		codes.put(name, new ArrayList<Integer>());
 		return codes;
 	}
 	
@@ -25,4 +19,13 @@ public class ChildNode extends Node{
 		return 1;
 	}
 	
+	public boolean isLeaf() {
+		return false;
+	}
+
+	@Override
+	protected HashMap<Integer, ArrayList<Integer>> getCode(ArrayList<Integer> previousArray) {
+		HashMap<Integer, ArrayList<Integer>> codes=new HashMap<Integer, ArrayList<Integer>>();
+		codes.put(name,previousArray);
+		return codes;	}
 }

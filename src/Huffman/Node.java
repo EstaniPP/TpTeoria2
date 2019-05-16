@@ -1,5 +1,6 @@
 package Huffman;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class Node implements Comparable<Node>{
@@ -7,9 +8,9 @@ public abstract class Node implements Comparable<Node>{
 	static Integer cont = 257;
 	double prob;
 	
-	public abstract HashMap<Integer,Integer> getCode();
+	public abstract HashMap<Integer,ArrayList<Integer>> getCode();
 	
-	protected abstract HashMap<Integer,Integer> getCode(Integer lastcode,int code);
+	protected abstract HashMap<Integer,ArrayList<Integer>> getCode(ArrayList<Integer> previousArray);
 	
 	public double getProb() {
 		return prob;
@@ -31,4 +32,6 @@ public abstract class Node implements Comparable<Node>{
 		}
 		return (int) (this.getProb()-node.getProb()-1);
 	}
+	
+	public abstract boolean isLeaf();
 }
