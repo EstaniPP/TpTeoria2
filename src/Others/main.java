@@ -28,16 +28,13 @@ public class main {
 		}
 		ImageParser b1 = p.getBlock(0, 0);
 		ArrayList<Byte> bytes = Huffman.encode(Huffman.getHuffman(Utilities.getProbabiliades(b1)), b1);
-		System.out.println(bytes.size());
-		for(Byte b : bytes) {
-			//if(b != 0)
-				//System.out.println(b.toString());
-		}
+		//System.out.println(bytes.size());
+		
 		
 		ArrayList<Integer> h = Huffman.decode(Huffman.getHuffmanTree(Utilities.getProbabiliades(b1)), bytes);
 		
-		System.out.println(b1.getRGB(0, 0).getRed());
-		System.out.println(h.get(0));
+		//System.out.println(b1.getRGB(0, 0).getRed());
+		System.out.println(h.size());
 		/*
 		double[] probabilities = {(double)1/22,(double)1/22,(double)9/22,(double)3/22,(double)2/22,(double)2/22,(double)4/22};
 			int i=0;
