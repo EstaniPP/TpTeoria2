@@ -1,6 +1,8 @@
 package Others;
 
+import java.awt.List;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 
 
@@ -180,5 +182,14 @@ public class Utilities {
 		}
 		
 		return salida.toString();
+	}
+	
+	public static byte[] ConvertByteListToPrimitives(ArrayList<Byte> input) {
+		byte[] ret = new byte[input.size()];
+		for (int i = 0; i < ret.length; i++) {
+			ret[i] = input.get(i);
+		}
+
+		return ret;
 	}
 }

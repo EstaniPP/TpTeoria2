@@ -31,7 +31,7 @@ public class FatherNode extends Node{
 		return codes;
 	}
 	
-	public int getHeight() {
+	public int getHeight() { 
 		if(n1.getHeight()>n2.getHeight()) {
 			return n1.getHeight()+1;
 		}

@@ -17,7 +17,7 @@ public abstract class Node implements Comparable<Node>{
 	}
 	
 	public int getName() {
-		return name;
+		return name; 
 	}
 	
 	public abstract int getHeight();

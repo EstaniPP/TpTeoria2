@@ -20,7 +20,7 @@ public class ChildNode extends Node{
 	}
 	
 	public boolean isLeaf() {
-		return false;
+		return true;
 	}
 
 	@Override

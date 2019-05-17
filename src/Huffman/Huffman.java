@@ -97,5 +97,54 @@ public class Huffman {
 		
 		return byteCodes;
 	}
-
+	
+	/*
+	  * @desc decodes a picture using Huffman's method
+	  * @param Node hTree - Huffman's tree
+	  * @param ArrayList<Byte> bytes - the encoded picture
+	  * @return ArrayList<Integer> - decoded
+	*/
+	
+	public static ArrayList<Integer> decode(Node hTree, ArrayList<Byte> bytes) {
+		// initialize araylist
+		ArrayList<Integer> ret = new ArrayList<Integer>();
+		// hTree is the tree root
+		// i need another temporal node to iterate
+		Node tempNode = hTree;
+		// set the mask on 10000000
+		byte mask = (byte) (1 << 7);
+		// iterate each byte
+		for(byte b : bytes) {
+			// iterate the byte itself
+			int bufferPos = 0;
+			while(bufferPos < 8) {
+				if((b & mask) == mask) {
+					// if its a leaf -> i found a symbol
+					if(tempNode.isLeaf()) {
+						//System.out.println(tempNode.getName());
+						// as i found a symbol, I need to start from the root again for next symbol
+						tempNode = hTree;
+						ret.add(tempNode.getName());
+					}else {
+						// it is a 1 -> lets get the node's right child
+						tempNode = ((FatherNode) tempNode).getRightSon();
+					}
+				}else {
+					// if its a leaf -> i found a symbol
+					if(tempNode.isLeaf()) {
+						//System.out.println(tempNode.getName());
+						// as i found a symbol, I need to start from the root again for the next symbol
+						tempNode = hTree;
+						ret.add(tempNode.getName());
+					}else {
+						// it is a 1 -> lets get the node's left child
+						tempNode = ((FatherNode) tempNode).getLeftSon();
+					}
+				}
+				bufferPos++;
+				b = (byte) (b << 1);
+			}
+		}
+		return ret;
+	}
 }
