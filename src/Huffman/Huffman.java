@@ -65,7 +65,9 @@ public class Huffman {
 	public static ArrayList<Byte> encode(HashMap<Integer, ArrayList<Integer>> codes, ImageParser img) {
 		// byte arraylist to fill up
 		ArrayList<Byte> byteCodes = new ArrayList<Byte>();
-		
+		// byte to fill
+		byte buffer = 0;
+		int bufferPos = 0;
 		// iterate the whole picture
 		for(int i = 0; i < 500; i++) {
 			for(int j = 0; j < 500; j++) {
@@ -73,14 +75,11 @@ public class Huffman {
 				Integer symbol = img.getRGB(i, j).getRed();
 				// get the code of the symbol
 				ArrayList<Integer> symbolCode = codes.get(symbol);
-				// byte to fill
-				byte buffer = 0;
-				int bufferPos = 0;
 				// put it in a byte
-				for(Integer bit : symbolCode) {
+				for(int bit : symbolCode) {
 					buffer = (byte) (buffer << 1);
 					bufferPos++;
-					if(bit == '1') {
+					if(bit == 1) {
 						buffer = (byte) (buffer | 1);
 					}
 					if (bufferPos == 8) {
@@ -89,11 +88,11 @@ public class Huffman {
 						bufferPos = 0;
 					}
 				}
-				if ((bufferPos < 8) && (bufferPos != 0)) {
-					buffer = (byte) (buffer << (8 - bufferPos));
-					byteCodes.add(buffer);
-				}
 			} 
+			if ((bufferPos < 8) && (bufferPos != 0)) {
+				buffer = (byte) (buffer << (8 - bufferPos));
+				byteCodes.add(buffer);
+			}
 		}
 		
 		return byteCodes;

@@ -26,7 +26,7 @@ public class ImageParser {
 	// consturctor
 	public ImageParser(File image){
 		try {
-			this.image = ImageIO.read(image);
+			this.image = ImageIO.read(image); 
 			width = this.image.getWidth();
 			height = this.image.getHeight();
 		} catch (IOException e) {
