@@ -8,7 +8,12 @@ import Huffman.Huffman;
 public class main {
 
 	public static void main(String[] args) {
-			double[] probabilities = {(double)1/22,(double)1/22,(double)9/22,(double)3/22,(double)2/22,(double)2/22,(double)4/22};
+		
+		byte p = 0;
+		System.out.println(p);
+			
+		/*
+		double[] probabilities = {(double)1/22,(double)1/22,(double)9/22,(double)3/22,(double)2/22,(double)2/22,(double)4/22};
 			int i=0;
 			for(double n: probabilities) {
 				System.out.println("Probabilidad de "+i+" es "+ n);
@@ -25,5 +30,6 @@ public class main {
 				System.out.println("");
 				
 			}
+		*/
 	}
 }
