@@ -30,10 +30,23 @@ public class main {
 		ArrayList<Byte> bytes = Huffman.encode(Huffman.getHuffman(Utilities.getProbabiliades(b1)), b1);
 		//System.out.println(bytes.size());
 		
-		
 		ArrayList<Integer> h = Huffman.decode(Huffman.getHuffmanTree(Utilities.getProbabiliades(b1)), bytes);
+		int comienzo = 0;
+		for(int i = 0; i < 500; i++) {
+			for(int j = 0; j < 500; j++) {
+				int original = b1.getRGB(i, j).getRed();
+				int decoded = h.get(comienzo);
+				if(original == decoded) {
+					System.out.println("comienzo: "+ comienzo + " coordenada "+ i + ", "+ j + " | original: "+original + " decoded: " +decoded);
+				}
+				comienzo++;
+			}
+		}
 		
-		//System.out.println(b1.getRGB(0, 0).getRed());
+		
+		//System.out.println("Color original"+ b1.getRGB(0, 30).getRed());
+		//System.out.println("Color decodeado"+ h.get(30));
+		
 		System.out.println(h.size());
 		/*
 		double[] probabilities = {(double)1/22,(double)1/22,(double)9/22,(double)3/22,(double)2/22,(double)2/22,(double)4/22};
