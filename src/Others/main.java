@@ -2,10 +2,12 @@ package Others;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 
@@ -36,11 +38,35 @@ public class main {
 			for(int j = 0; j < 500; j++) {
 				int original = b1.getRGB(i, j).getRed();
 				int decoded = h.get(comienzo);
-				if(original == decoded) {
+				if(original == decoded && false) {
 					System.out.println("comienzo: "+ comienzo + " coordenada "+ i + ", "+ j + " | original: "+original + " decoded: " +decoded);
 				}
 				comienzo++;
 			}
+		}
+		
+		// escribir a una img random
+		BufferedImage img = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+		
+		comienzo = 0;
+		for(int i = 0; i < 500; i++) {
+			for(int j = 0; j < 500; j++) {
+				int original = b1.getRGB(i, j).getRed();
+				int decoded = h.get(comienzo);
+				int p1 = (decoded<<24) | (decoded<<16) | (decoded<<8) | decoded; 
+				img.setRGB(i, j, p1);
+				comienzo++;
+			}
+		}
+
+		
+		
+		File file = new File("myimage.png");
+        try {
+			ImageIO.write(img, "png", file);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		
