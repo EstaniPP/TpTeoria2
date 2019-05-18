@@ -113,18 +113,13 @@ public class Huffman {
 		// set the mask on 10000000
 		byte mask = (byte) (1 << 7);
 		// iterate each byte
-		int p = 0;
 		for(byte b : bytes) {
 			// iterate the byte itself
 			int bufferPos = 0;
 			while(bufferPos < 8) {
 				if(tempNode.isLeaf()) {
-					//System.out.println(tempNode.getName());
 					// as i found a symbol, I need to start from the root again for next symbol
 					ret.add(tempNode.getName());
-					p++;
-					if(p == 500)
-						System.out.println(tempNode.getName());
 					tempNode = hTree;
 				}else {
 					if((b & mask) == mask) {
