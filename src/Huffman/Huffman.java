@@ -72,7 +72,7 @@ public class Huffman {
 		for(int i = 0; i < 500; i++) {
 			for(int j = 0; j < 500; j++) {
 				// get the symbol
-				Integer symbol = img.getRGB(i, j).getRed();
+				Integer symbol = img.getRGB(j, i).getRed();
 				// get the code of the symbol
 				ArrayList<Integer> symbolCode = codes.get(symbol);
 				// put it in a byte

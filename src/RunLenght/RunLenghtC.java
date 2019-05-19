@@ -14,7 +14,7 @@ public class RunLenghtC {
 	
 	public static ArrayList<Byte> encode(ImageParser imagen) {
 		ArrayList<Byte> resultado = new ArrayList<Byte>();
-		int cont = 0;
+		int cont = -1;
 		int actual = imagen.getRGB(0, 0).getRed();
 		for(int i = 0; i < imagen.blockHeight(0, 0); i++) {
 			for(int j = 0; j < imagen.blockWidth(0, 0); j++) {
@@ -30,9 +30,12 @@ public class RunLenghtC {
 					resultado.add((byte) actual);
 					resultado.add((byte) cont);
 					cont = 0;
+					actual = imagen.getRGB(j, i).getRed();
 				}
 			}
 		}
+		resultado.add((byte) actual);
+		resultado.add((byte) cont);
 		return resultado;
 	}
 	
