@@ -1,8 +1,14 @@
 package Others;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -16,7 +22,7 @@ import Huffman.Huffman;
 public class main {
 
 	public static void main(String[] args) {
-		
+		/*
 		ImageParser p = null;
 		BufferedImage bi;
 		
@@ -69,11 +75,11 @@ public class main {
 			e.printStackTrace();
 		}
 		
-		
+		*/
 		//System.out.println("Color original"+ b1.getRGB(0, 30).getRed());
 		//System.out.println("Color decodeado"+ h.get(30));
 		
-		System.out.println(h.size());
+		//System.out.println(h.size());
 		/*
 		double[] probabilities = {(double)1/22,(double)1/22,(double)9/22,(double)3/22,(double)2/22,(double)2/22,(double)4/22};
 			int i=0;
@@ -93,5 +99,30 @@ public class main {
 				
 			}
 		*/
+		Header h = new Header(25);
+		for(int i=0;i<25;i++) {
+			Double[] doble = new Double[255];
+			for(int j=0;j<255;j++) {
+				doble[j] = 1/3d;
+			}
+			h.setHuffman(i, doble);
+		}
+
+		
+	      try {
+	          ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+	          ObjectOutputStream out = new ObjectOutputStream(fileOut);
+	          out.writeObject(h);
+	          out.close();
+	          System.out.println(fileOut.size());
+	          fileOut.close();
+	          System.out.printf("Serialized data is saved in /tmp/employee.bin");
+	       } catch (IOException i) {
+	          i.printStackTrace();
+	       }
+	      
+	      //FileInputStream fis = new FileInputStream(fileName);
+	      //ObjectInputStream ois = new ObjectInputStream(fis);) {
+	      //stu = (Header) ois.readObject();
 	}
 }
