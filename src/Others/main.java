@@ -45,9 +45,9 @@ public class main {
 		int comienzo = 0;
 		for(int i = 0; i < 500; i++) {
 			for(int j = 0; j < 500; j++) {
-				int original = b1.getRGB(i, j).getRed();
-				int deco = decoded.get(comienzo);
-				if(original == deco && false) {
+				int original = b1.getRGB(j, i).getRed();
+				int deco = decoded.get(i * 500 + j);
+				if(original != deco) {
 					System.out.println("comienzo: "+ comienzo + " coordenada "+ i + ", "+ j + " | original: "+original + " deco: " +deco);
 				}
 				comienzo++;
