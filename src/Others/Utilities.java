@@ -2,6 +2,12 @@ package Others;
 
 import java.awt.List;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
@@ -193,7 +199,108 @@ public class Utilities {
 		return ret;
 	}
 	
-	/*public static getImage() {
+	//gets header original size
+	public static int getHeaderSize(ArrayList<Byte> byteArray) {
+		int headerSize = 0;
+		//iterates the 3 first values of the array, where the header size were saved
+		for(int i = 0; i < 3; i++) {
+			//adjust size by the byte place
+			headerSize = headerSize*256;
+			int aux = byteArray.get(i);
+			//check aux's sign
+			if(aux < 0) {
+				aux += 256;
+			}
+			headerSize+=aux;
+		}
+		return headerSize;
+	}
+	
+	//get header's object
+	public static Header getHeader(ArrayList<Byte> byteArray) {
+		//gets header size
+		int size = getHeaderSize(byteArray);
+		//array with the header
+		byte[] header = new byte[size];
+		//iterates from third place becuase the 3 first values are header size
+		for(int i = 3; i < size + 3; i++) {
+			header[i-3]=byteArray.get(i);
+		}
 		
-	}*/
+		ByteArrayInputStream bis = new ByteArrayInputStream(header);
+		ObjectInput in = null;
+		Header h = null;
+		try {
+			in = new ObjectInputStream(bis);
+			h = (Header) in.readObject();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} 
+		return h;
+	}
+	
+	//this method gets a bitecode with the header and it's size in the 3 first places
+	public static ArrayList<Byte> getHeadersByteCode(Header headerToCode){
+		//creates returns arrayList 
+		ArrayList<Byte> ret = new ArrayList<Byte>();
+		
+		//convert header to byte code
+		/**/
+	    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
+	    ObjectOutputStream out;
+	    try {
+	    	out = new ObjectOutputStream(fileOut);
+	    	out.writeObject(headerToCode);
+	    	
+	    } catch (IOException e) {
+			e.printStackTrace();
+		}
+
+        byte[] headerArray = fileOut.toByteArray();
+        /**/
+        
+        //size of headers byte code
+        long size = fileOut.size();
+        
+        byte fByte,sByte,tByte;
+		tByte = ((byte)(size % 256));
+		size = size / 256;
+		sByte = ((byte)(size % 256));
+		fByte = ((byte)(size / 256));
+		ret.add(fByte);
+		ret.add(sByte);
+		ret.add(tByte);
+		
+		//saves headers byte code in ret
+		for(int i = 0; i < headerArray.length; i++) {
+        	ret.add(3+i,headerArray[i]);
+        }
+		
+		return ret;
+	}
+	
+	public static void main(String[] args) {
+		byte b = 0;
+		Header h = new Header(25);
+		for(int i = 0; i < 25; i++) {
+			if(i % 2 == 0) {
+				Double[] prob = new Double[256];
+				for(int j = 0; j < 256; j++) {
+					prob[j] = (double)1/j;
+				}
+				h.setHuffman(i, prob);
+			}else {
+				h.setRLC(i);
+			}
+		}
+        ArrayList<Byte> bytecode = getHeadersByteCode(h);
+        
+		Header decodedHeader = getHeader(bytecode);
+		for(int i = 0; i < 25; i++) {
+			System.out.println(decodedHeader.getEncoder(i));
+		}
+	}
+	
 }
