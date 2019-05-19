@@ -192,4 +192,8 @@ public class Utilities {
 
 		return ret;
 	}
+	
+	/*public static getImage() {
+		
+	}*/
 }

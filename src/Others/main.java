@@ -97,17 +97,7 @@ public class main {
 				}
 				System.out.println("");
 				
-			}
-		*/
-		Header h = new Header(25);
-		for(int i=0;i<25;i++) {
-			Double[] doble = new Double[255];
-			for(int j=0;j<255;j++) {
-				doble[j] = 1/3d;
-			}
-			h.setHuffman(i, doble);
-		}
-
+			}*/
 		
 	      try {
 	          ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
