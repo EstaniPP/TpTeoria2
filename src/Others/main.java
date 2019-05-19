@@ -18,11 +18,12 @@ import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 
 import Huffman.Huffman;
+import RunLenght.RunLenghtC;
 
 public class main {
 
 	public static void main(String[] args) {
-		/*
+		
 		ImageParser p = null;
 		BufferedImage bi;
 		
@@ -35,6 +36,25 @@ public class main {
 			bi = p.getBI();
 		}
 		ImageParser b1 = p.getBlock(0, 0);
+		
+		ArrayList<Byte> encoded = RunLenghtC.encode(b1);
+		
+		ArrayList<Integer> decoded = RunLenghtC.decode(encoded);
+		
+		System.out.println(decoded.size());
+		int comienzo = 0;
+		for(int i = 0; i < 500; i++) {
+			for(int j = 0; j < 500; j++) {
+				int original = b1.getRGB(i, j).getRed();
+				int deco = decoded.get(comienzo);
+				if(original == deco && false) {
+					System.out.println("comienzo: "+ comienzo + " coordenada "+ i + ", "+ j + " | original: "+original + " deco: " +deco);
+				}
+				comienzo++;
+			}
+		}
+		
+		/*
 		ArrayList<Byte> bytes = Huffman.encode(Huffman.getHuffman(Utilities.getProbabiliades(b1)), b1);
 		//System.out.println(bytes.size());
 		
@@ -99,7 +119,7 @@ public class main {
 				
 			}*/
 		
-	      try {
+/*	      try {
 	          ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
 	          ObjectOutputStream out = new ObjectOutputStream(fileOut);
 	          out.writeObject(h);
@@ -114,5 +134,6 @@ public class main {
 	      //FileInputStream fis = new FileInputStream(fileName);
 	      //ObjectInputStream ois = new ObjectInputStream(fis);) {
 	      //stu = (Header) ois.readObject();
+	       */
 	}
 }
