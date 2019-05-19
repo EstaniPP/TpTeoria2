@@ -1,14 +1,17 @@
 package Others;
 
-import java.awt.List;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
+
+import javax.swing.JFileChooser;
 
 
 
@@ -281,7 +284,40 @@ public class Utilities {
 		return ret;
 	}
 	
+	//creates an archive from an arraylist with the encoded image in the path
+	public static void saveArchive(ArrayList<Byte> info, String path) {			
+		try {
+			//creates bytes array and fill it with arraylist info
+			byte[] byteCode = new byte[info.size()];
+			for(int i = 0; i < byteCode.length; i++) {
+				byteCode[i] = info.get(i);
+			}
+			FileOutputStream fos = new FileOutputStream(path);
+			//writes de file in disk
+			fos.write(byteCode);
+			fos.close();
+		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static ArrayList<Byte> getArchivesByteCode(String path){
+		ArrayList<Byte> encodeImage = new ArrayList<Byte>();
+		try {
+			byte[] inputSequence = Files.readAllBytes(new File(path).toPath());
+			for(int i = 0; i < inputSequence.length; i++) {
+				encodeImage.add(inputSequence[i]);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}	
+		
+		return encodeImage;
+	}
+	
 	public static void main(String[] args) {
+		//creates an example header
 		Header h = new Header(25);
 		for(int i = 0; i < 25; i++) {
 			if(i % 2 == 0) {
@@ -294,12 +330,34 @@ public class Utilities {
 				h.setRLC(i);
 			}
 		}
+		
+		//gets header bytecode
         ArrayList<Byte> bytecode = getHeadersByteCode(h);
         
-		Header decodedHeader = getHeader(bytecode);
-		for(int i = 0; i < 25; i++) {
-			System.out.println(decodedHeader.getEncoder(i));
-		}
+        //select path
+		JFileChooser chooser = new JFileChooser(); 
+		String destination = "";
+	    chooser.setCurrentDirectory(new java.io.File("."));
+	    chooser.setDialogTitle(destination);
+	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	    chooser.setAcceptAllFileFilterUsed(false);    
+	    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) { 
+	      destination = chooser.getSelectedFile().toString();
+	      
+	      //save archive in the path
+	      saveArchive(bytecode, new String(destination+"/imagen.bin"));
+	      
+	      //get bytecode from path
+	      ArrayList<Byte> encodedImage = getArchivesByteCode(new String(destination+"/imagen.bin"));
+	      
+	      //get header from btecode
+	      Header decodedHeader = getHeader(encodedImage);
+	      
+	      //prints header info to corroborrate that it works
+	      for(int i = 0; i < 25; i++) {
+				System.out.println(decodedHeader.getEncoder(i));
+			}
+	    }
 	}
 	
 }
