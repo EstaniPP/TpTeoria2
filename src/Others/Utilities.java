@@ -302,10 +302,15 @@ public class Utilities {
 		}
 	}
 	
+	//get bytecode from a path and return it as arraylist
 	public static ArrayList<Byte> getArchivesByteCode(String path){
+		
+		//creates arralist
 		ArrayList<Byte> encodeImage = new ArrayList<Byte>();
 		try {
+			//read file
 			byte[] inputSequence = Files.readAllBytes(new File(path).toPath());
+			//fill arraylist
 			for(int i = 0; i < inputSequence.length; i++) {
 				encodeImage.add(inputSequence[i]);
 			}
@@ -313,6 +318,7 @@ public class Utilities {
 			e.printStackTrace();
 		}	
 		
+		//returns arraylist
 		return encodeImage;
 	}
 	
