@@ -53,4 +53,7 @@ public class Header implements Serializable {
 	public void setBlockSizeEncoded(int i, int size) {
 		blockSizeEncoded[i] = size;
 	}
+	public Integer[] getBlockSizes() {
+		return blockSizeEncoded;
+	}
 }

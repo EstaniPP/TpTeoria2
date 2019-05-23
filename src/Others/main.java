@@ -37,7 +37,8 @@ public class main {
 		}
 		ImageParser b1 = p.getBlock(0, 0);
 		
-		p.getBlock(4);
+		//p.getBlock(4);
+		
 		
 		
 		//ArrayList<Byte> bytes = Huffman.encode(Huffman.getHuffman(Utilities.getProbabiliades(b1)), b1);

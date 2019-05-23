@@ -187,10 +187,6 @@ public class Utilities {
 			header[i-3]=byteArray.get(i);
 		}
 		
-		// remove the header
-		for(int i = 0; i < 3 + size; i++) {
-			byteArray.remove(i);
-		}
 		
 		ByteArrayInputStream bis = new ByteArrayInputStream(header);
 		ObjectInput in = null;
@@ -206,6 +202,18 @@ public class Utilities {
 		return h;
 	}
 	
+	public static ArrayList<Byte> getNoHeader(ArrayList<Byte> byteArray){
+		
+		int size = getHeaderSize(byteArray);
+		
+		System.out.println("Header size: " + size);
+		
+		
+		ArrayList<Byte> aux = new ArrayList<Byte>();
+		for(int i = size + 3; i < byteArray.size(); i++)
+			aux.add(byteArray.get(i));
+		return aux;
+	}
 	
 	//this method gets a bitecode with the header and it's size in the 3 first places
 	
@@ -322,13 +330,27 @@ public class Utilities {
 		return whole;
 	}
 	
-	public static ImageParser decodeImage(ArrayList<Byte> encoded) {
-		
-		System.out.println(encoded.size());
-		
+	public static ImageParser decodeImage(ArrayList<Byte> encoded) {		
 		Header header = Utilities.getHeader(encoded);
+		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
 		
-		System.out.println("pepardo: " + encoded.size() + header.getBlockSize());
+		ArrayList<Integer> decoded = new ArrayList<Integer>();
+		
+		int start = 0;
+		for(int c : header.getBlockSizes()) {
+			for(int i = start; i < c; i++) {
+				byte b = rawImage.get(i);
+				int byteValue = 0;
+				if(b < 0)
+					byteValue = b + 256;
+				decoded.add(byteValue);
+			}
+			start += c;
+		}
+		
+		System.out.println("Big image size: " + decoded.size());
+		
+		
 		return null;
 	}
 	
