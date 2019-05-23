@@ -310,23 +310,27 @@ public class Utilities {
 				// fix this up
 				Double[] p = Utilities.getPObjectArray(b);
 				double[] p1 = Utilities.getProbabiliades(b);
+				
 				// ...
 				
 				// Huffman Case
 				ArrayList<Byte> hffmn = Huffman.encode(Huffman.getHuffman(p1), b);
 				h.setHuffman(j, p);
+				h.setBlockSizeEncoded(j, hffmn.size());
 				imageByte.addAll(hffmn);
 			}else {
 				// rlc case
 				ArrayList<Byte> rlc = RunLenghtC.encode(b);
 				h.setRLC(j);
+				h.setBlockSizeEncoded(j, rlc.size());
 				imageByte.addAll(rlc);
 			}
+			
 		}
 		
 		ArrayList<Byte> whole = getHeaderByteCode(h);
 		whole.addAll(imageByte);
-		
+		System.out.println("ENCODED HUFFMAN SIZE: " + whole.size());
 		return whole;
 	}
 	
@@ -337,15 +341,31 @@ public class Utilities {
 		ArrayList<Integer> decoded = new ArrayList<Integer>();
 		
 		int start = 0;
+		int blockNumber = 0;
 		for(int c : header.getBlockSizes()) {
-			for(int i = start; i < c; i++) {
-				byte b = rawImage.get(i);
-				int byteValue = 0;
-				if(b < 0)
-					byteValue = b + 256;
-				decoded.add(byteValue);
+			ArrayList<Byte> blockBytes = new ArrayList<Byte>();
+			for(int i = start; i < c + start; i++) {
+				blockBytes.add(rawImage.get(i));
+			}
+			if(header.getEncoder(blockNumber)) {
+				// huffman
+				Double[] probsO = header.getProbs(blockNumber);
+				double[] probs = new double[probsO.length];
+				for(int i = 0; i < probsO.length; i++) {
+					probs[i] = probsO[i];	
+				}
+				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes);
+				System.out.println("Tam antes de llenar: " + decoded.size());
+				System.out.println("Tam a llenar: " + deco.size());
+				System.out.println("Tam del bloque codificado: " + blockBytes.size());
+				decoded.addAll(deco);
+				System.out.println("Tam despues de llenar: " + decoded.size());
+			}else {
+				// rlc
+				decoded.addAll(RunLenghtC.decode(blockBytes));
 			}
 			start += c;
+			blockNumber++;
 		}
 		
 		System.out.println("Big image size: " + decoded.size());
@@ -354,49 +374,7 @@ public class Utilities {
 		return null;
 	}
 	
-	public static void main(String[] args) {
-		//creates an example header
-		Header h = new Header(25);
-		for(int i = 0; i < 25; i++) {
-			if(i % 2 == 0) {
-				Double[] prob = new Double[256];
-				for(int j = 0; j < 256; j++) {
-					prob[j] = (double)1/j;
-				}
-				h.setHuffman(i, prob);
-			}else {
-				h.setRLC(i);
-			}
-		}
-		
-		//gets header bytecode
-        ArrayList<Byte> bytecode = getHeaderByteCode(h);
-        
-        //select path
-		JFileChooser chooser = new JFileChooser(); 
-		String destination = "";
-	    chooser.setCurrentDirectory(new java.io.File("."));
-	    chooser.setDialogTitle(destination);
-	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	    chooser.setAcceptAllFileFilterUsed(false);    
-	    if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) { 
-	      destination = chooser.getSelectedFile().toString();
-	      
-	      //save archive in the path
-	      saveFile(bytecode, new String(destination+"/imagen.bin"));
-	      
-	      //get bytecode from path
-	      ArrayList<Byte> encodedImage = getFileByteCode(new String(destination+"/imagen.bin"));
-	      
-	      //get header from btecode
-	      Header decodedHeader = getHeader(encodedImage);
-	      
-	      //prints header info to corroborrate that it works
-	      for(int i = 0; i < 25; i++) {
-				System.out.println(decodedHeader.getEncoder(i));
-	      }
-	    }
-	}
+
 	
 	
 	

@@ -6,7 +6,9 @@ import java.util.HashMap;
 public class Header implements Serializable {
 
 	Boolean[] encoders;
+	
 	Integer[] blockSizeEncoded;
+	
 	HashMap<Integer, Double[]> probabilities;
 	Integer size;
 	
@@ -53,6 +55,7 @@ public class Header implements Serializable {
 	public void setBlockSizeEncoded(int i, int size) {
 		blockSizeEncoded[i] = size;
 	}
+	
 	public Integer[] getBlockSizes() {
 		return blockSizeEncoded;
 	}
