@@ -37,6 +37,52 @@ public class main {
 		}
 		ImageParser b1 = p.getBlock(0, 0);
 		
+		p.getBlock(4);
+		
+		
+		//ArrayList<Byte> bytes = Huffman.encode(Huffman.getHuffman(Utilities.getProbabiliades(b1)), b1);
+		
+		System.out.println("pepe");
+		
+		
+		//select path
+		JFileChooser chooser = new JFileChooser(); 
+		String destination = "";
+		chooser.setCurrentDirectory(new java.io.File("."));
+		chooser.setDialogTitle(destination);
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		chooser.setAcceptAllFileFilterUsed(false);    
+		System.out.println("pepe");
+		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) { 
+			destination = chooser.getSelectedFile().toString();
+			      
+			//save archive in the path
+			ArrayList<Byte> encoded = Utilities.encodeImage(p, 20);
+			
+			Utilities.decodeImage(encoded);
+			
+			Utilities.saveFile(encoded, new String(destination+"/imagen.bin"));
+			      //get bytecode from path
+			//ArrayList<Byte> encodedImage = getFileByteCode(new String(destination+"/imagen.bin"));
+			      
+			      //get header from btecode
+			//Header decodedHeader = getHeader(encodedImage);
+			      
+			      //prints header info to corroborrate that it works
+			//for(int i = 0; i < 25; i++) {
+			//	System.out.println(decodedHeader.getEncoder(i));
+			//}
+
+		}
+		//System.out.println(Huffman.getHuffman(Utilities.getProbabiliades(b1)).toString());
+		
+		
+		
+		//System.out.println(bytes.size());
+		
+		//Huffman.encode(Huffman.getHuffmanTree(), img)
+		
+		/*
 		ArrayList<Byte> encoded = RunLenghtC.encode(b1);
 		
 		ArrayList<Integer> decoded = RunLenghtC.decode(encoded);

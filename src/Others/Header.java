@@ -6,11 +6,18 @@ import java.util.HashMap;
 public class Header implements Serializable {
 
 	Boolean[] encoders;
+	Integer[] blockSizeEncoded;
 	HashMap<Integer, Double[]> probabilities;
 	Integer size;
 	
+	int blockHeight = 500;
+	int blockWidth = 500;
+	
 	public Header(int size) {
+		
 		encoders = new Boolean[size];
+		blockSizeEncoded = new Integer[size];
+		
 		this.size = size;
 		probabilities = new HashMap<Integer, Double[]>();
 	}
@@ -36,4 +43,14 @@ public class Header implements Serializable {
 		return probabilities.get(index);
 	}
 	
+	public int getBlockSize() {
+		return blockWidth * blockHeight;
+	}
+	
+	public int getBlockSizeEncoded(int i) {
+		return blockSizeEncoded[i];
+	}
+	public void setBlockSizeEncoded(int i, int size) {
+		blockSizeEncoded[i] = size;
+	}
 }

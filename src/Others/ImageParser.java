@@ -124,5 +124,11 @@ public class ImageParser {
 	}
 	
 	
+	public ImageParser getBlock(int bNumber) {		
+		int x = bNumber % getWidthInBlocks();
+		int y = bNumber / getWidthInBlocks();
+		return getBlock(x, y);
+	}
+	
 	
 }

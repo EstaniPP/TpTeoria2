@@ -13,12 +13,13 @@ import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 
+import Huffman.Huffman;
+import RunLenght.RunLenghtC;
+
 
 
 public class Utilities {
-	private static int tiradasMinimas = 1000000;
-	private static Double epsilonDesvio = 1e-8;
-	private static Double epsilonMedia = 1e-8;	
+
 	
 	public static double[] getProbabiliades(ImageParser image) {
 		double[] probabilidades = new double[256];
@@ -26,6 +27,27 @@ public class Utilities {
 		
 		for(int i = 0; i < 256; i++) {
 			probabilidades[i] = 0;
+			veces[i] = 0;
+		}
+		
+		for(int i = 0; i < 500; i++) {
+			for(int j = 0; j < 500; j++) {
+				veces[image.getRGB(j, i).getRed()]++;
+			}
+		}
+		for(int i = 0; i < 256; i++) {
+			probabilidades[i] = ((double) veces[i]) / (double) (500*500);
+		}
+		
+		return probabilidades;
+	}
+	
+	public static Double[] getPObjectArray(ImageParser image) {
+		Double[] probabilidades = new Double[256];
+		int[] veces = new int[256];
+		
+		for(int i = 0; i < 256; i++) {
+			probabilidades[i] = 0d;
 			veces[i] = 0;
 		}
 		
@@ -107,72 +129,7 @@ public class Utilities {
 		
 		return matrizcond;
 	}
-	
 
-	private static boolean converge(double act, double ant, double epsilon) {
-		if(Math.abs(act-ant)<epsilon) {
-			return true;
-		}
-		return false;
-	}
-	
-	private static int getColorMontecarlo(double[] probabilidadAcumulada) {
-		double rand = Math.random();
-		for(int i=0; i<256; i++) {
-			if(rand<=probabilidadAcumulada[i]) {
-				return i;
-			}
-		}
-		return 255;
-	}
-	
-	private static int getColorMontecarloCondicional(double[][] matrizAcumulada, int valor) {
-		double rand = Math.random();
-		for(int i=0; i<256; i++) {
-			if(rand<=matrizAcumulada[i][valor]) {
-				return i;
-			}
-		}
-		return 255;
-	}
-	
-	public static double[] getProcEstocasticos(ImageParser img) {
-		double sumaMedia=0.0;
-		double suma = 0.0;
-		int tiradas=0;
-		double act=0.0;
-		double ant=-1.0;
-		double mediaant=0.0;
-		double mediaact = -1.0;
-		
-		double[] probabilidadAcumulada = Utilities.getProbabiliades(img);
-		double[][] matrizAcumulada = Utilities.getMatrizCondicional(img);
-		double sumaprob =0;
-		for(int i=0; i<256; i++) {
-			double sumacond =0;
-			for(int j=1; j<256; j++) {
-				sumacond+=matrizAcumulada[j][i];
-				matrizAcumulada[j][i]=sumacond;
-			}
-			sumaprob+=probabilidadAcumulada[i];
-			probabilidadAcumulada[i]=sumaprob;	 
-		}
-		int valor = Utilities.getColorMontecarlo(probabilidadAcumulada);
-		
-		while((!converge(act,ant, Utilities.epsilonDesvio) && !converge(mediaact,mediaant, Utilities.epsilonMedia)) || tiradas<Utilities.tiradasMinimas ) {
-			valor = Utilities.getColorMontecarloCondicional(matrizAcumulada, valor);
-			sumaMedia += (double) valor;
-			tiradas++;
-			suma += Math.pow(((double)valor-(sumaMedia /(double) tiradas)), 2);
-			ant=act;
-			act=Math.sqrt(suma/(double) tiradas);
-			
-			mediaant=mediaact;
-			mediaact=sumaMedia/(double)tiradas;
-		}
-		double[] procEstocasticos = new double[]{mediaact,act};
-		return procEstocasticos;
-	}
 
 	public static String getRepeticiones(ImageParser img) {
 		int[] repeticiones = new int[256];
@@ -205,7 +162,7 @@ public class Utilities {
 	//gets header original size
 	public static int getHeaderSize(ArrayList<Byte> byteArray) {
 		int headerSize = 0;
-		//iterates the 3 first values of the array, where the header size were saved
+		//iterates the 3 first values of the array, where the header size was saved
 		for(int i = 0; i < 3; i++) {
 			//adjust size by the byte place
 			headerSize = headerSize*256;
@@ -230,6 +187,11 @@ public class Utilities {
 			header[i-3]=byteArray.get(i);
 		}
 		
+		// remove the header
+		for(int i = 0; i < 3 + size; i++) {
+			byteArray.remove(i);
+		}
+		
 		ByteArrayInputStream bis = new ByteArrayInputStream(header);
 		ObjectInput in = null;
 		Header h = null;
@@ -244,13 +206,15 @@ public class Utilities {
 		return h;
 	}
 	
+	
 	//this method gets a bitecode with the header and it's size in the 3 first places
-	public static ArrayList<Byte> getHeadersByteCode(Header headerToCode){
+	
+	public static ArrayList<Byte> getHeaderByteCode(Header headerToCode){
 		//creates returns arrayList 
 		ArrayList<Byte> ret = new ArrayList<Byte>();
 		
 		//convert header to byte code
-		/**/
+		
 	    ByteArrayOutputStream fileOut = new ByteArrayOutputStream();
 	    ObjectOutputStream out;
 	    try {
@@ -285,7 +249,7 @@ public class Utilities {
 	}
 	
 	//creates an archive from an arraylist with the encoded image in the path
-	public static void saveArchive(ArrayList<Byte> info, String path) {			
+	public static void saveFile(ArrayList<Byte> info, String path) {			
 		try {
 			//creates bytes array and fill it with arraylist info
 			byte[] byteCode = new byte[info.size()];
@@ -303,7 +267,7 @@ public class Utilities {
 	}
 	
 	//get bytecode from a path and return it as arraylist
-	public static ArrayList<Byte> getArchivesByteCode(String path){
+	public static ArrayList<Byte> getFileByteCode(String path){
 		
 		//creates arralist
 		ArrayList<Byte> encodeImage = new ArrayList<Byte>();
@@ -322,6 +286,52 @@ public class Utilities {
 		return encodeImage;
 	}
 	
+	public static boolean figureOut(Double entrophy) {
+		return true;
+	}
+	
+	public static ArrayList<Byte> encodeImage(ImageParser i, int blocks){
+		ArrayList<Byte> imageByte = new ArrayList<Byte>();
+		Header h = new Header(blocks);
+		
+		for(int j = 0; j < blocks; j++) {
+			// get the block
+			ImageParser b = i.getBlock(j);
+			if(figureOut(1234d)) {
+				
+				// fix this up
+				Double[] p = Utilities.getPObjectArray(b);
+				double[] p1 = Utilities.getProbabiliades(b);
+				// ...
+				
+				// Huffman Case
+				ArrayList<Byte> hffmn = Huffman.encode(Huffman.getHuffman(p1), b);
+				h.setHuffman(j, p);
+				imageByte.addAll(hffmn);
+			}else {
+				// rlc case
+				ArrayList<Byte> rlc = RunLenghtC.encode(b);
+				h.setRLC(j);
+				imageByte.addAll(rlc);
+			}
+		}
+		
+		ArrayList<Byte> whole = getHeaderByteCode(h);
+		whole.addAll(imageByte);
+		
+		return whole;
+	}
+	
+	public static ImageParser decodeImage(ArrayList<Byte> encoded) {
+		
+		System.out.println(encoded.size());
+		
+		Header header = Utilities.getHeader(encoded);
+		
+		System.out.println("pepardo: " + encoded.size() + header.getBlockSize());
+		return null;
+	}
+	
 	public static void main(String[] args) {
 		//creates an example header
 		Header h = new Header(25);
@@ -338,7 +348,7 @@ public class Utilities {
 		}
 		
 		//gets header bytecode
-        ArrayList<Byte> bytecode = getHeadersByteCode(h);
+        ArrayList<Byte> bytecode = getHeaderByteCode(h);
         
         //select path
 		JFileChooser chooser = new JFileChooser(); 
@@ -351,10 +361,10 @@ public class Utilities {
 	      destination = chooser.getSelectedFile().toString();
 	      
 	      //save archive in the path
-	      saveArchive(bytecode, new String(destination+"/imagen.bin"));
+	      saveFile(bytecode, new String(destination+"/imagen.bin"));
 	      
 	      //get bytecode from path
-	      ArrayList<Byte> encodedImage = getArchivesByteCode(new String(destination+"/imagen.bin"));
+	      ArrayList<Byte> encodedImage = getFileByteCode(new String(destination+"/imagen.bin"));
 	      
 	      //get header from btecode
 	      Header decodedHeader = getHeader(encodedImage);
@@ -362,8 +372,12 @@ public class Utilities {
 	      //prints header info to corroborrate that it works
 	      for(int i = 0; i < 25; i++) {
 				System.out.println(decodedHeader.getEncoder(i));
-			}
+	      }
 	    }
 	}
+	
+	
+	
+	
 	
 }
