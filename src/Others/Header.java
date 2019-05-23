@@ -10,6 +10,7 @@ public class Header implements Serializable {
 	Integer[] blockSizeEncoded;
 	
 	HashMap<Integer, Double[]> probabilities;
+	
 	Integer size;
 	
 	int blockHeight = 500;
@@ -49,6 +50,9 @@ public class Header implements Serializable {
 		return blockWidth * blockHeight;
 	}
 	
+	public int getQtyBlocks() {
+		return size;
+	}
 	public int getBlockSizeEncoded(int i) {
 		return blockSizeEncoded[i];
 	}

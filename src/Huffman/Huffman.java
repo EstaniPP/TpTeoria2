@@ -104,7 +104,7 @@ public class Huffman {
 	  * @return ArrayList<Integer> - decoded
 	*/
 	
-	public static ArrayList<Integer> decode(Node hTree, ArrayList<Byte> bytes) {
+	public static ArrayList<Integer> decode(Node hTree, ArrayList<Byte> bytes, int blockSize) {
 		// initialize araylist
 		ArrayList<Integer> ret = new ArrayList<Integer>();
 		// hTree is the tree root
@@ -113,6 +113,7 @@ public class Huffman {
 		// set the mask on 10000000
 		byte mask = (byte) (1 << 7);
 		// iterate each byte
+		int qty = 0;
 		for(byte b : bytes) {
 			// iterate the byte itself
 			int bufferPos = 0;
@@ -120,6 +121,7 @@ public class Huffman {
 				if(tempNode.isLeaf()) {
 					// as i found a symbol, I need to start from the root again for next symbol
 					ret.add(tempNode.getName());
+					qty++;
 					tempNode = hTree;
 				}else {
 					if((b & mask) == mask) {
@@ -132,6 +134,8 @@ public class Huffman {
 					bufferPos++;
 					b = (byte) (b << 1);
 				}
+				if(qty == blockSize)
+					break;
 			}
 		}
 		return ret;

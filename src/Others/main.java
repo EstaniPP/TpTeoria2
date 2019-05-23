@@ -1,5 +1,7 @@
 package Others;
 
+import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -9,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -21,11 +24,13 @@ import Huffman.Huffman;
 import RunLenght.RunLenghtC;
 
 public class main {
-
+	static ImageParser p1 = null;
+	static BufferedImage bi1 = null;
+	
 	public static void main(String[] args) {
 		
 		ImageParser p = null;
-		BufferedImage bi;
+		BufferedImage bi = null;
 		
 		JFileChooser fileChooser = new JFileChooser();
 		fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
@@ -35,17 +40,53 @@ public class main {
 			p = new ImageParser(image);
 			bi = p.getBI();
 		}
-		ImageParser b1 = p.getBlock(0, 0);
+		
+		
+		
+		
+		try {
+			EventQueue.invokeAndWait(new Runnable() {
+			    @Override
+			    public void run() {
+			    	JFileChooser fileChooser1 = new JFileChooser();
+					fileChooser1.setCurrentDirectory(new File(System.getProperty("user.dir")));
+					int seleccion1 = fileChooser1.showOpenDialog(null);
+					if(seleccion1 == JFileChooser.APPROVE_OPTION) {
+						File image = fileChooser1.getSelectedFile();
+						main.this.p1 = new ImageParser(image);
+						main.this.bi1 = p1.getBI();
+					}
+			    }
+			});
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		System.out.println("RUIDO:    " + Utilities.getRuido(p, main.p1));
+		
+		/*
+		ArrayList<Integer> ai = new ArrayList<Integer> ();
+		for(int a = 0; a < 2500; a++) {
+			for(int b = 0; b < 2000; b++) {
+				Color m = new Color(bi.getRGB(b, a));
+				ai.add(m.getRed());
+			}	
+		}*/
+		
 		
 		//p.getBlock(4);
 		
 		
-		
 		//ArrayList<Byte> bytes = Huffman.encode(Huffman.getHuffman(Utilities.getProbabiliades(b1)), b1);
 		
-		System.out.println("pepe");
 		
-		
+		/*
 		//select path
 		JFileChooser chooser = new JFileChooser(); 
 		String destination = "";
@@ -54,15 +95,24 @@ public class main {
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		chooser.setAcceptAllFileFilterUsed(false);    
 		System.out.println("pepe");
+		ArrayList<Byte> encoded = null;
 		if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) { 
-			destination = chooser.getSelectedFile().toString();
-			      
+			destination = chooser.getSelectedFile().toString(); 
 			//save archive in the path
-			ArrayList<Byte> encoded = Utilities.encodeImage(p, 20);
-			
-			Utilities.decodeImage(encoded);
-			
+			encoded = Utilities.encodeImage(p, 20);
 			Utilities.saveFile(encoded, new String(destination+"/imagen.bin"));
+		}
+		
+		
+		
+		BufferedImage buf = Utilities.decodeImage(encoded);
+		try {
+			boolean write = ImageIO.write(buf, "bmp", new File("./p.bmp"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 			      //get bytecode from path
 			//ArrayList<Byte> encodedImage = getFileByteCode(new String(destination+"/imagen.bin"));
 			      
@@ -74,10 +124,18 @@ public class main {
 			//	System.out.println(decodedHeader.getEncoder(i));
 			//}
 
-		}
+		//}
 		//System.out.println(Huffman.getHuffman(Utilities.getProbabiliades(b1)).toString());
 		
-		
+		/* USAR POR SI ACASO 
+		 ArrayList<Integer> decoded = Utilities.decodeImage(encoded);
+			
+			for(int pepe = 0; pepe < 500; pepe++) {
+				if(!ai.get(pepe).equals(decoded.get(pepe))) {
+					System.out.println("original: " + ai.get(pepe) + " Deco: " + decoded.get(pepe));
+				}
+			}
+		 * */
 		
 		//System.out.println(bytes.size());
 		

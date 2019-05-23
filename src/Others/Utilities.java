@@ -1,5 +1,7 @@
 package Others;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -314,6 +316,7 @@ public class Utilities {
 				// ...
 				
 				// Huffman Case
+				
 				ArrayList<Byte> hffmn = Huffman.encode(Huffman.getHuffman(p1), b);
 				h.setHuffman(j, p);
 				h.setBlockSizeEncoded(j, hffmn.size());
@@ -334,7 +337,7 @@ public class Utilities {
 		return whole;
 	}
 	
-	public static ImageParser decodeImage(ArrayList<Byte> encoded) {		
+	public static BufferedImage decodeImage(ArrayList<Byte> encoded) {		
 		Header header = Utilities.getHeader(encoded);
 		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
 		
@@ -354,12 +357,16 @@ public class Utilities {
 				for(int i = 0; i < probsO.length; i++) {
 					probs[i] = probsO[i];	
 				}
-				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes);
+				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes, header.getBlockSize());
+				/*
+				System.out.println("############## BLOQUE " + blockNumber + " ############## ");
 				System.out.println("Tam antes de llenar: " + decoded.size());
 				System.out.println("Tam a llenar: " + deco.size());
 				System.out.println("Tam del bloque codificado: " + blockBytes.size());
-				decoded.addAll(deco);
+				
 				System.out.println("Tam despues de llenar: " + decoded.size());
+				*/
+				decoded.addAll(deco);
 			}else {
 				// rlc
 				decoded.addAll(RunLenghtC.decode(blockBytes));
@@ -368,14 +375,88 @@ public class Utilities {
 			blockNumber++;
 		}
 		
-		System.out.println("Big image size: " + decoded.size());
+		//System.out.println("Big image size: " + decoded.size());
+		
+		BufferedImage nuevaImagen = new BufferedImage(2000, 2500, BufferedImage.TYPE_BYTE_GRAY);
+		
+		int pixel = 0;
+		
+		for(int fila = 0; fila < 2500; fila = fila + 500) {
+			for(int col = 0; col < 2000; col = col + 500) {
+				
+				for(int x = fila; x < fila + 500; x++) {
+					for(int y = col; y < col + 500; y++) {
+						//System.out.println("algo : " + pixel);
+						int color = decoded.get(pixel);
+						nuevaImagen.setRGB(y, x, new Color(color, color, color).getRGB());
+						pixel++;
+					}
+				}
+				
+			}
+		}
 		
 		
-		return null;
+		return nuevaImagen;
 	}
 	
-
 	
+	public static double[] getHi(ImageParser sent, ImageParser received) {
+		double[][] condMat = new double[256][256];
+		int[] times = new int[256];
+		double[] Hi = new double[256];
+		
+		for(int row = 0; row < 256; row++) {
+			times[row] = 0;
+			Hi[row] = 0;
+			for(int column = 0; column < 256; column++) {
+				condMat[row][column] = 0;
+			}
+		}
+		
+		
+		for(int row = 0; row < 2500; row++) {
+			for(int column = 0; column < 2000; column++) {
+				condMat[received.getRGB(column, row).getRed()][sent.getRGB(column, row).getRed()]++;
+				times[sent.getRGB(column, row).getRed()]++;
+			}
+		}
+		
+		for(int row = 0; row < 256; row++) {
+			for(int column = 0; column < 256; column++) {
+				if(times[column] != 0) {
+					condMat[row][column] = condMat[row][column] / times[column];
+				}else {
+					condMat[row][column] = 0;
+				}
+			}
+		}
+		
+		for(int column = 0; column < 256; column++) {
+			for(int row = 0; row < 256; row++) {
+				if(condMat[row][column] != 0) {
+					Hi[column] -= condMat[row][column]*Math.log(condMat[row][column]) / Math.log(2);
+				}
+			}
+		}
+		
+		
+		return Hi;
+	}
+
+	public static double getRuido(ImageParser sent, ImageParser received) {
+		double[] Hi = Utilities.getHi(sent, received);
+		double[] prob = Utilities.getProbabiliades(sent);
+		
+		
+		double aux = 0d;
+		for(int i = 0; i < 256; i++) {
+			System.out.println(Hi[i]);
+			System.out.println("ä" + prob[i]);
+			aux += prob[i] * Hi[i];
+		}
+		return aux;
+	}
 	
 	
 	
