@@ -358,14 +358,6 @@ public class Utilities {
 					probs[i] = probsO[i];	
 				}
 				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes, header.getBlockSize());
-				/*
-				System.out.println("############## BLOQUE " + blockNumber + " ############## ");
-				System.out.println("Tam antes de llenar: " + decoded.size());
-				System.out.println("Tam a llenar: " + deco.size());
-				System.out.println("Tam del bloque codificado: " + blockBytes.size());
-				
-				System.out.println("Tam despues de llenar: " + decoded.size());
-				*/
 				decoded.addAll(deco);
 			}else {
 				// rlc
@@ -400,12 +392,16 @@ public class Utilities {
 		return nuevaImagen;
 	}
 	
-	
+	//obtains conditional entropies between sent image and received image
 	public static double[] getHi(ImageParser sent, ImageParser received) {
+		//creates conditional matrix
 		double[][] condMat = new double[256][256];
+		//this array has the count of color occurrences
 		int[] times = new int[256];
+		//array with the conditional entropies
 		double[] Hi = new double[256];
 		
+		//fill condMat and times with zeros
 		for(int row = 0; row < 256; row++) {
 			times[row] = 0;
 			Hi[row] = 0;
@@ -414,14 +410,16 @@ public class Utilities {
 			}
 		}
 		
-		
+		//fills conMat with the conditional occurrences between sent and received images
 		for(int row = 0; row < 2500; row++) {
 			for(int column = 0; column < 2000; column++) {
+				//add by one on sent color column and received color row
 				condMat[received.getRGB(column, row).getRed()][sent.getRGB(column, row).getRed()]++;
 				times[sent.getRGB(column, row).getRed()]++;
 			}
 		}
 		
+		//calculates conMat dividing each place of condMat by the total occurrences of the column color
 		for(int row = 0; row < 256; row++) {
 			for(int column = 0; column < 256; column++) {
 				if(times[column] != 0) {
@@ -432,6 +430,7 @@ public class Utilities {
 			}
 		}
 		
+		//fills Hi array with conditional entropy of each color
 		for(int column = 0; column < 256; column++) {
 			for(int row = 0; row < 256; row++) {
 				if(condMat[row][column] != 0) {
@@ -440,19 +439,20 @@ public class Utilities {
 			}
 		}
 		
-		
+		//returns Hi array
 		return Hi;
 	}
 
+	//this method gets the noise between the image that was sent and the image that was received
 	public static double getRuido(ImageParser sent, ImageParser received) {
+		//obtains conditional entropies
 		double[] Hi = Utilities.getHi(sent, received);
+		//obtains color probabilities of sent image
 		double[] prob = Utilities.getProbabiliades(sent);
 		
-		
+		//obtain noise
 		double aux = 0d;
 		for(int i = 0; i < 256; i++) {
-			System.out.println(Hi[i]);
-			System.out.println("ä" + prob[i]);
 			aux += prob[i] * Hi[i];
 		}
 		return aux;
