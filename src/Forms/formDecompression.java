@@ -15,6 +15,9 @@ import javax.swing.JFileChooser;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.text.BadLocationException;
+
+import Others.ImageParser;
 import Others.Utilities;
 
 import javax.swing.ImageIcon;
@@ -138,16 +141,25 @@ public class formDecompression extends JPanel{
 		
 		JButton btnCrearArchivos = new JButton("Descomprimir");
 		btnCrearArchivos.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {          
-				decode = Utilities.getFileByteCode(origen);
-			    progressBar.setValue(30);
-			    progressBar.repaint();
-				bi = Utilities.decodeImage(decode);
-				formDecompression.this.lblNewLabel.setIcon(new ImageIcon(formDecompression.resize(bi, 500, 625)));
-				btnGuarfarCompresion.setEnabled(true);
+			public void actionPerformed(ActionEvent arg0) {    
+				Thread parallel = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						decode = Utilities.getFileByteCode(origen);
+					    progressBar.setValue(30);
+					    progressBar.repaint();
+						bi = Utilities.decodeImage(decode);
+						formDecompression.this.lblNewLabel.setIcon(new ImageIcon(formDecompression.resize(bi, 500, 625)));
+						btnGuarfarCompresion.setEnabled(true);
+					}
+					
+				});
+			    parallel.start();
+				
 			}
 		});
-		btnCrearArchivos.setBounds(307, 105, 199, 25);
+		btnCrearArchivos.setBounds(26, 657, 199, 25);
 		frame.getContentPane().add(btnCrearArchivos);
 	
 	}

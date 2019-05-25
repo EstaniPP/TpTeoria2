@@ -152,18 +152,27 @@ public class formCompression extends JPanel{
 		
 		JButton btnCrearArchivos = new JButton("Crear compresion");
 		btnCrearArchivos.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {          
-			    ImageParser p = new ImageParser(image);
-			    progressBar.setValue(0);
-			    encode = Utilities.encodeImage(p, 20);
-			    btnGuarfarCompresion.setEnabled(true);
-			    try {
-					textPane.getStyledDocument().insertString(0,"La imagen se comprimio con exito.   "
-							+ "     El tamano de la imagen comprimida es: "+encode.size()+" bytes", null);
-				} catch (BadLocationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+			public void actionPerformed(ActionEvent arg0) {  
+				Thread parallel = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						ImageParser p = new ImageParser(image);
+					    progressBar.setValue(0);
+					    encode = Utilities.encodeImage(p, 20);
+					    btnGuarfarCompresion.setEnabled(true);
+					    try {
+							textPane.getStyledDocument().insertString(0,"La imagen se comprimio con exito.   "
+									+ "     El tamano de la imagen comprimida es: "+encode.size()+" bytes", null);
+						} catch (BadLocationException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					
+				});
+			    parallel.start();
 			}
 		});
 		btnCrearArchivos.setBounds(305, 614, 199, 25);
