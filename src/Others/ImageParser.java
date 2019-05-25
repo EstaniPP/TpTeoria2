@@ -130,5 +130,13 @@ public class ImageParser {
 		return getBlock(x, y);
 	}
 	
+	public int getHeight() {
+		return height;
+	}
+	
+	public int getWidth() {
+		return width;
+	}
+	
 	
 }

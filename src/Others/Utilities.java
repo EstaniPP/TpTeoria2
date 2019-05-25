@@ -13,8 +13,11 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
 
+import Forms.formCompression;
+import Forms.formDecompression;
 import Huffman.Huffman;
 import RunLenght.RunLenghtC;
 
@@ -32,13 +35,13 @@ public class Utilities {
 			veces[i] = 0;
 		}
 		
-		for(int i = 0; i < 500; i++) {
-			for(int j = 0; j < 500; j++) {
+		for(int i = 0; i < image.getHeight(); i++) {
+			for(int j = 0; j < image.getWidth(); j++) {
 				veces[image.getRGB(j, i).getRed()]++;
 			}
 		}
 		for(int i = 0; i < 256; i++) {
-			probabilidades[i] = ((double) veces[i]) / (double) (500*500);
+			probabilidades[i] = ((double) veces[i]) / (double) (image.getHeight()*image.getWidth());
 		}
 		
 		return probabilidades;
@@ -266,7 +269,7 @@ public class Utilities {
 			for(int i = 0; i < byteCode.length; i++) {
 				byteCode[i] = info.get(i);
 			}
-			FileOutputStream fos = new FileOutputStream(path);
+			FileOutputStream fos = new FileOutputStream(path+"/compressed.bin");
 			//writes de file in disk
 			fos.write(byteCode);
 			fos.close();
@@ -303,7 +306,7 @@ public class Utilities {
 	public static ArrayList<Byte> encodeImage(ImageParser i, int blocks){
 		ArrayList<Byte> imageByte = new ArrayList<Byte>();
 		Header h = new Header(blocks);
-		
+		formCompression.progressBar.setValue(20);
 		for(int j = 0; j < blocks; j++) {
 			// get the block
 			ImageParser b = i.getBlock(j);
@@ -321,19 +324,24 @@ public class Utilities {
 				h.setHuffman(j, p);
 				h.setBlockSizeEncoded(j, hffmn.size());
 				imageByte.addAll(hffmn);
+
+				formCompression.progressBar.setValue(20+j*5);
+				
 			}else {
 				// rlc case
 				ArrayList<Byte> rlc = RunLenghtC.encode(b);
 				h.setRLC(j);
 				h.setBlockSizeEncoded(j, rlc.size());
 				imageByte.addAll(rlc);
+			
+				formCompression.progressBar.setValue(20+j*5);
 			}
 			
 		}
 		
 		ArrayList<Byte> whole = getHeaderByteCode(h);
 		whole.addAll(imageByte);
-		System.out.println("ENCODED HUFFMAN SIZE: " + whole.size());
+		formCompression.progressBar.setValue(100);
 		return whole;
 	}
 	
@@ -342,7 +350,8 @@ public class Utilities {
 		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
 		
 		ArrayList<Integer> decoded = new ArrayList<Integer>();
-		
+
+		formDecompression.progressBar.setValue(20);
 		int start = 0;
 		int blockNumber = 0;
 		for(int c : header.getBlockSizes()) {
@@ -359,9 +368,13 @@ public class Utilities {
 				}
 				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes, header.getBlockSize());
 				decoded.addAll(deco);
+				
+				formDecompression.progressBar.setValue(20+blockNumber*3);
+				
 			}else {
 				// rlc
 				decoded.addAll(RunLenghtC.decode(blockBytes));
+				formDecompression.progressBar.setValue(20+blockNumber*3);
 			}
 			start += c;
 			blockNumber++;
@@ -388,7 +401,8 @@ public class Utilities {
 			}
 		}
 		
-		
+
+		formDecompression.progressBar.setValue(100);
 		return nuevaImagen;
 	}
 	
@@ -458,7 +472,14 @@ public class Utilities {
 		return aux;
 	}
 	
-	
+	public static void saveImage(BufferedImage bi, String path) {
+		try {				
+			ImageIO.write(bi, "bmp", new File(path+"/compressedImage.bmp"));
+		} catch (IOException e) {
+			System.out.println("hola");
+			e.printStackTrace();
+		}
+	}
 	
 	
 }
