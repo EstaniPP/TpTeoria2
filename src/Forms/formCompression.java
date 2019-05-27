@@ -174,8 +174,10 @@ public class formCompression extends JPanel{
 					    encode = Utilities.encodeImage(p, 20, (Double) comboBox.getSelectedItem());
 					    btnGuarfarCompresion.setEnabled(true);
 					    try {
-							textPane.getStyledDocument().insertString(0,"La imagen se comprimio con exito.   "
-									+ "     El tamano de la imagen comprimida es: "+encode.size()+" bytes", null);
+					    	textPane.setText("");
+							textPane.getStyledDocument().insertString(0,"La imagen se comprimio con exito\n"
+									+ "El tamano de la imagen comprimida es: "+encode.size()+" bytes", null);
+							
 						} catch (BadLocationException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

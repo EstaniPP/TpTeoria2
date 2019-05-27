@@ -311,7 +311,7 @@ public class Utilities {
 		for(int j = 0; j < blocks; j++) {
 			// get the block
 			ImageParser b = i.getBlock(j);
-			if(!figureOut(Utilities.getEntropiaCMemoria(b), ht)) {
+			if(figureOut(Utilities.getEntropiaCMemoria(b), ht)) {
 				
 				// fix this up
 				Double[] p = Utilities.getPObjectArray(b);
