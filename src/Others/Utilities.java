@@ -299,18 +299,19 @@ public class Utilities {
 		return encodeImage;
 	}
 	
-	public static boolean figureOut(Double entrophy) {
-		return true;
+	public static boolean figureOut(Double entrophy, Double ht) {
+		// returns true if entrophy is equal greater than ht
+		return (entrophy >= ht);
 	}
 	
-	public static ArrayList<Byte> encodeImage(ImageParser i, int blocks){
+	public static ArrayList<Byte> encodeImage(ImageParser i, int blocks, double ht){
 		ArrayList<Byte> imageByte = new ArrayList<Byte>();
 		Header h = new Header(blocks);
 		formCompression.progressBar.setValue(20);
 		for(int j = 0; j < blocks; j++) {
 			// get the block
 			ImageParser b = i.getBlock(j);
-			if(!figureOut(1234d)) {
+			if(!figureOut(Utilities.getEntropiaCMemoria(b), ht)) {
 				
 				// fix this up
 				Double[] p = Utilities.getPObjectArray(b);

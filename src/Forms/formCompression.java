@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
+import javax.swing.JComboBox;
 
 public class formCompression extends JPanel{
 
@@ -85,7 +86,7 @@ public class formCompression extends JPanel{
 		lblNewLabel = new JLabel("");
 		
 		frame = new JFrame();
-		frame.setBounds(20, 20, 524, 727);
+		frame.setBounds(20, 20, 524, 764);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -140,15 +141,25 @@ public class formCompression extends JPanel{
 			}
 		});
 		btnGuarfarCompresion.setEnabled(false);
-		btnGuarfarCompresion.setBounds(305, 657, 199, 25);
+		btnGuarfarCompresion.setBounds(307, 695, 199, 25);
 		frame.getContentPane().add(btnGuarfarCompresion);
 		
 		JTextPane textPane = new JTextPane();
 		textPane.setEditable(false);
-		textPane.setBounds(16, 614, 267, 68);
+		textPane.setBounds(16, 657, 267, 68);
 		frame.getContentPane().add(textPane);
 		
 		
+
+		Double[] entropias = new Double[30];
+		for(int i = 30; i < 60; i++) {
+			entropias[i - 30] = ((double)(i + 1) / 10);
+		}
+		
+		JComboBox comboBox = new JComboBox(entropias);
+		comboBox.setBounds(182, 625, 71, 27);
+		frame.getContentPane().add(comboBox);
+		comboBox.setSelectedIndex(0);
 		
 		JButton btnCrearArchivos = new JButton("Crear compresion");
 		btnCrearArchivos.addActionListener(new ActionListener() {
@@ -160,7 +171,7 @@ public class formCompression extends JPanel{
 						// TODO Auto-generated method stub
 						ImageParser p = new ImageParser(image);
 					    progressBar.setValue(0);
-					    encode = Utilities.encodeImage(p, 20);
+					    encode = Utilities.encodeImage(p, 20, (Double) comboBox.getSelectedItem());
 					    btnGuarfarCompresion.setEnabled(true);
 					    try {
 							textPane.getStyledDocument().insertString(0,"La imagen se comprimio con exito.   "
@@ -175,8 +186,13 @@ public class formCompression extends JPanel{
 			    parallel.start();
 			}
 		});
-		btnCrearArchivos.setBounds(305, 614, 199, 25);
+		btnCrearArchivos.setBounds(307, 658, 199, 25);
 		frame.getContentPane().add(btnCrearArchivos);
-	
+		
+		JLabel lblSeleccioneUnValor = new JLabel("Seleccione un valor de Ht");
+		lblSeleccioneUnValor.setBounds(16, 629, 159, 16);
+		frame.getContentPane().add(lblSeleccioneUnValor);
+		
+		
 	}
 }
