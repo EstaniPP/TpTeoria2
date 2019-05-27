@@ -147,7 +147,6 @@ public class formDecompression extends JPanel{
 					@Override
 					public void run() {
 						decode = Utilities.getFileByteCode(origen);
-					    progressBar.setValue(30);
 					    progressBar.repaint();
 						bi = Utilities.decodeImage(decode);
 						formDecompression.this.lblNewLabel.setIcon(new ImageIcon(formDecompression.resize(bi, 500, 625)));

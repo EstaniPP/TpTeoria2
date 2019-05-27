@@ -310,7 +310,7 @@ public class Utilities {
 		for(int j = 0; j < blocks; j++) {
 			// get the block
 			ImageParser b = i.getBlock(j);
-			if(figureOut(1234d)) {
+			if(!figureOut(1234d)) {
 				
 				// fix this up
 				Double[] p = Utilities.getPObjectArray(b);
