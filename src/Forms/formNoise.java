@@ -143,6 +143,15 @@ public class formNoise extends JPanel{
 		label_1.setBounds(552, 93, 500, 500);
 		frame.getContentPane().add(label_1);
 		
+		JButton btnCalcularPerdida = new JButton("Calcular perdida");
+		btnCalcularPerdida.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {                                       
+				JOptionPane.showMessageDialog(frame, "El ruido entre la imagen "
+						+ "enviada y la recibida es de:" + Utilities.getRuido(p2, p1));				}
+		});
+		btnCalcularPerdida.setBounds(757, 617, 146, 25);
+		frame.getContentPane().add(btnCalcularPerdida);
+		
 	}	
 }
 
