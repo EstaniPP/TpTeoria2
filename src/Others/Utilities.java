@@ -393,7 +393,14 @@ public class Utilities {
 				for(int x = fila; x < fila + 500; x++) {
 					for(int y = col; y < col + 500; y++) {
 						//System.out.println("algo : " + pixel);
-						int color = decoded.get(pixel);
+						int color = 0;
+						try {
+							color = decoded.get(pixel);
+						}catch(IndexOutOfBoundsException e) {
+							System.out.println("Le erraste en pixel x = " + x + " y = " + y + " y pixel = "+pixel );
+							System.out.println("El tamanio del arreglo de pixeles es de " + decoded.size());
+						}
+						
 						nuevaImagen.setRGB(y, x, new Color(color, color, color).getRGB());
 						pixel++;
 					}
