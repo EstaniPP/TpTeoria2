@@ -134,8 +134,13 @@ public class Huffman {
 					bufferPos++;
 					b = (byte) (b << 1);
 				}
-				if(qty == blockSize)
+				if(qty == 250000)
 					break;
+			}
+			if(tempNode.isLeaf()) {
+				ret.add(tempNode.getName());
+				qty++;
+				tempNode = hTree;
 			}
 		}
 		return ret;

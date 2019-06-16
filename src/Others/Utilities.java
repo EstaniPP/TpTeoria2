@@ -322,6 +322,7 @@ public class Utilities {
 				// Huffman Case
 				
 				ArrayList<Byte> hffmn = Huffman.encode(Huffman.getHuffman(p1), b);
+				System.out.println("Bloque "+j+" tiene un size de "+hffmn.size());
 				h.setHuffman(j, p);
 				h.setBlockSizeEncoded(j, hffmn.size());
 				imageByte.addAll(hffmn);
@@ -397,8 +398,6 @@ public class Utilities {
 						try {
 							color = decoded.get(pixel);
 						}catch(IndexOutOfBoundsException e) {
-							System.out.println("Le erraste en pixel x = " + x + " y = " + y + " y pixel = "+pixel );
-							System.out.println("El tamanio del arreglo de pixeles es de " + decoded.size());
 						}
 						
 						nuevaImagen.setRGB(y, x, new Color(color, color, color).getRGB());
