@@ -151,9 +151,9 @@ public class formCompression extends JPanel{
 		
 		
 
-		Double[] entropias = new Double[30];
-		for(int i = 30; i < 60; i++) {
-			entropias[i - 30] = ((double)(i + 1) / 10);
+		Double[] entropias = new Double[61];
+		for(int i = 0; i < 61; i++) {
+			entropias[i] = ((double)(i) / 10);
 		}
 		
 		JComboBox comboBox = new JComboBox(entropias);
