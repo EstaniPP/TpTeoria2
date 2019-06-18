@@ -312,17 +312,12 @@ public class Utilities {
 			// get the block
 			ImageParser b = i.getBlock(j);
 			if(figureOut(Utilities.getEntropiaCMemoria(b), ht)) {
-				
-				// fix this up
 				Double[] p = Utilities.getPObjectArray(b);
 				double[] p1 = Utilities.getProbabiliades(b);
 				
-				// ...
-				
 				// Huffman Case
-				
+				System.out.println("El bloque "+ j+ " usa Huffman");
 				ArrayList<Byte> hffmn = Huffman.encode(Huffman.getHuffman(p1), b);
-				System.out.println("Bloque "+j+" tiene un size de "+hffmn.size());
 				h.setHuffman(j, p);
 				h.setBlockSizeEncoded(j, hffmn.size());
 				imageByte.addAll(hffmn);
@@ -331,6 +326,8 @@ public class Utilities {
 				
 			}else {
 				// rlc case
+
+				System.out.println("El bloque "+ j+ " usa RLC");
 				ArrayList<Byte> rlc = RunLenghtC.encode(b);
 				h.setRLC(j);
 				h.setBlockSizeEncoded(j, rlc.size());
