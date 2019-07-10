@@ -105,7 +105,8 @@ public class ImageParser {
 		// get size
 		int blockWidth = blockWidth(x, y);
 		int blockHeight = blockHeight(x, y);
-		
+		//System.out.println("Block x " + x + " y " + y);
+		//System.out.println("width " + blockWidth + " height " + blockHeight);
 		return new ImageParser(image.getSubimage(xCord, yCord, blockWidth, blockHeight));		
 	}
 	

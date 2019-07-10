@@ -6,7 +6,7 @@ import java.util.HashMap;
 public abstract class Node implements Comparable<Node>{
 	Integer name;
 	static Integer cont = 257;
-	double prob;
+	Double prob;
 	
 	public abstract HashMap<Integer,ArrayList<Integer>> getCode();
 	
@@ -24,13 +24,26 @@ public abstract class Node implements Comparable<Node>{
 		
 	public int compareTo(Node o) {
 		Node node = o;
-		if(this.getProb()==node.getProb())
+		/*if(this.getProb()==node.getProb())
 			if(this.getHeight()!=node.getHeight()) {
+				System.out.println("1");
 				return (int) (-this.getHeight()+node.getHeight());
 			}else{
+				System.out.println("2");
 				return (int) (this.getName()-node.getName()-1);
 		}
+		System.out.println("3");
 		return (int) (this.getProb()-node.getProb()-1);
+		*/
+		if(this.getProb()==node.getProb()) {
+			return 0;
+		}else {
+			if(this.getProb() > node.getProb()) {
+				return 1;
+			}else {
+				return -1;
+			}
+		}
 	}
 	
 	public abstract boolean isLeaf();

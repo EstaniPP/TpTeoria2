@@ -1,11 +1,14 @@
 package Forms;
 
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -17,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import Others.ImageParser;
+import Others.Procesadores;
 import Others.Utilities;
 
 import javax.swing.ImageIcon;
@@ -27,6 +31,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 
 public class formCompression extends JPanel{
 
@@ -43,7 +48,9 @@ public class formCompression extends JPanel{
 	public static JProgressBar progressBar;
 	private JButton btnGuarfarCompresion;
 	private ArrayList<Byte> encode = null;
+	JCheckBox chckbxUserParallelCompression = null;
 	BufferedImage bi;
+	JComboBox comboBox;
 
 	/**
 	 * Launch the application.
@@ -108,7 +115,7 @@ public class formCompression extends JPanel{
 				if(seleccion == JFileChooser.APPROVE_OPTION) {
 					image = fileChooser.getSelectedFile();
 					ImageParser p = new ImageParser(image);
-					formCompression.this.bi = bi;
+					formCompression.this.bi = p.getBI();
 					
 					BufferedImage bi = p.getBI();
 					formCompression.this.textField.setText(image.getPath());
@@ -116,7 +123,7 @@ public class formCompression extends JPanel{
 				}
 			}
 		});
-		btnSeleccionar.setBounds(378, 24, 128, 29);
+		btnSeleccionar.setBounds(356, 26, 112, 29);
 		frame.getContentPane().add(btnSeleccionar);
 		
 		
@@ -156,7 +163,12 @@ public class formCompression extends JPanel{
 			entropias[i] = ((double)(i) / 10);
 		}
 		
-		JComboBox comboBox = new JComboBox(entropias);
+		Procesadores[] proce = new Procesadores[201];
+		proce[0] = new Procesadores("Disponibles", -1);
+		for(int i = 1; i <= 200; i++) {
+			proce[i] = new Procesadores(String.valueOf(i), i);
+		}
+		comboBox = new JComboBox(proce);
 		comboBox.setBounds(182, 625, 71, 27);
 		frame.getContentPane().add(comboBox);
 		comboBox.setSelectedIndex(0);
@@ -165,23 +177,24 @@ public class formCompression extends JPanel{
 		btnCrearArchivos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {  
 				Thread parallel = new Thread(new Runnable() {
-
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
-						ImageParser p = new ImageParser(image);
+						long start = System.currentTimeMillis();
+						ImageParser p = new ImageParser(bi);
+						formCompression.progressBar.setValue(0);
 					    progressBar.setValue(0);
-					    encode = Utilities.encodeImage(p, 20, (Double) comboBox.getSelectedItem());
+					    frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					    if(chckbxUserParallelCompression.isSelected()) {
+					    	encode = Utilities.parallelEncoder(p, 20, ((Procesadores)comboBox.getSelectedItem()).getValue());
+					    }else{
+					    	encode = Utilities.encodeImageSequential(p, 20);
+					    }
+					    frame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					    btnGuarfarCompresion.setEnabled(true);
-					    try {
-					    	textPane.setText("");
-							textPane.getStyledDocument().insertString(0,"La imagen se comprimio con exito\n"
-									+ "El tamano de la imagen comprimida es: "+encode.size()+" bytes", null);
-							
-						} catch (BadLocationException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+					    long end = System.currentTimeMillis();
+					    textPane.setText("Tiempo transcurrido: " + (end - start));
+						//textPane.getStyledDocument().insertString(0,"La imagen se comprimio con exito\n"
+								//+ "El tamano de la imagen comprimida es: "+encode.size()+" bytes", null);
 					}
 					
 				});
@@ -191,9 +204,31 @@ public class formCompression extends JPanel{
 		btnCrearArchivos.setBounds(307, 658, 199, 25);
 		frame.getContentPane().add(btnCrearArchivos);
 		
-		JLabel lblSeleccioneUnValor = new JLabel("Seleccione un valor de Ht");
+		JLabel lblSeleccioneUnValor = new JLabel("Seleccione procesadores:");
 		lblSeleccioneUnValor.setBounds(16, 629, 159, 16);
 		frame.getContentPane().add(lblSeleccioneUnValor);
+		
+		chckbxUserParallelCompression = new JCheckBox("PARALLEL VERSION");
+		chckbxUserParallelCompression.setBounds(307, 625, 199, 23);
+		frame.getContentPane().add(chckbxUserParallelCompression);
+		
+		JButton btnRand = new JButton("RAND");
+		btnRand.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				BufferedImage nuevaImagen = new BufferedImage(5000, 8000, BufferedImage.TYPE_BYTE_GRAY);
+				Random random = new Random();
+				for(int x = 0; x < 5000; x++) {
+					for(int y = 0; y < 8000; y++) {
+						int color = random.nextInt(256);
+						nuevaImagen.setRGB(x, y, new Color(color, color, color).getRGB());
+					}
+				}
+				formCompression.this.bi = nuevaImagen;
+				formCompression.this.lblNewLabel.setIcon(new ImageIcon(formCompression.resize(nuevaImagen, 500, 625)));
+			}
+		});
+		btnRand.setBounds(459, 26, 65, 29);
+		frame.getContentPane().add(btnRand);
 		
 		
 	}

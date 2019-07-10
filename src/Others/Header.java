@@ -13,16 +13,29 @@ public class Header implements Serializable {
 	
 	Integer size;
 	
+	int wholeX;
+	int wholeY;
+	
 	int blockHeight = 500;
 	int blockWidth = 500;
 	
-	public Header(int size) {
+	Integer[] xSize;
+	Integer[] ySize;
+	
+	public Header(int size, int wx, int wy) {
 		
 		encoders = new Boolean[size];
 		blockSizeEncoded = new Integer[size];
 		
+		xSize = new Integer[size];
+		ySize = new Integer[size];
+		
 		this.size = size;
 		probabilities = new HashMap<Integer, Double[]>();
+		
+		wholeX = wx;
+		wholeY = wy;
+		
 	}
 	
 	//set true in index's array and add the probilities to the hash
@@ -46,8 +59,8 @@ public class Header implements Serializable {
 		return probabilities.get(index);
 	}
 	
-	public int getBlockSize() {
-		return blockWidth * blockHeight;
+	public int getBlockSize(int block) {
+		return xSize[block] * ySize[block];
 	}
 	
 	public int getQtyBlocks() {
@@ -63,4 +76,24 @@ public class Header implements Serializable {
 	public Integer[] getBlockSizes() {
 		return blockSizeEncoded;
 	}
+	
+	public int getX(int block) {
+		return xSize[block];
+	}
+	public int getY(int block) {
+		return ySize[block];
+	}
+	
+	public void setXY(int block, int x, int y) {
+		xSize[block] = x;
+		ySize[block] = y;
+	}
+	public int getWholeX() {
+		return wholeX;
+	}
+	
+	public int getWholeY() {
+		return wholeY;
+	}
+	
 }

@@ -12,12 +12,12 @@ import Others.ImageParser;
 
 public class Huffman {
 
-	public static HashMap<Integer, ArrayList<Integer>> getHuffman(double[] probabilities) {
+	public static HashMap<Integer, ArrayList<Integer>> getHuffman(Double[] probabilities) {
 		
 		LinkedList<Node> huffmanList = new LinkedList<Node>();
 		for(Integer i=0; i<probabilities.length; i++) {
 			if(probabilities[i]!=0){
-				ChildNode node = new ChildNode((Integer)i,probabilities[i]);
+				ChildNode node = new ChildNode((Integer)i, probabilities[i]);
 				huffmanList.add(node);
 			}
 		}
@@ -69,8 +69,8 @@ public class Huffman {
 		byte buffer = 0;
 		int bufferPos = 0;
 		// iterate the whole picture
-		for(int i = 0; i < 500; i++) {
-			for(int j = 0; j < 500; j++) {
+		for(int i = 0; i < img.getHeight(); i++) {
+			for(int j = 0; j < img.getWidth(); j++) {
 				// get the symbol
 				Integer symbol = img.getRGB(j, i).getRed();
 				// get the code of the symbol
@@ -134,7 +134,7 @@ public class Huffman {
 					bufferPos++;
 					b = (byte) (b << 1);
 				}
-				if(qty == 250000)
+				if(qty == blockSize)
 					break;
 			}
 			if(tempNode.isLeaf()) {

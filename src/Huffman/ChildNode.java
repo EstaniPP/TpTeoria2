@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ChildNode extends Node{
-	public ChildNode(Integer name, double prob) {
+	public ChildNode(Integer name, Double prob) {
 		this.name = name;
 		this.prob = prob;
 	}

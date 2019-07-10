@@ -12,13 +12,19 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
 
 import Forms.formCompression;
 import Forms.formDecompression;
 import Huffman.Huffman;
+import Parallel.ParallelEncoder;
 import RunLenght.RunLenghtC;
 
 
@@ -56,13 +62,13 @@ public class Utilities {
 			veces[i] = 0;
 		}
 		
-		for(int i = 0; i < 500; i++) {
-			for(int j = 0; j < 500; j++) {
+		for(int i = 0; i < image.getHeight(); i++) {
+			for(int j = 0; j < image.getWidth(); j++) {
 				veces[image.getRGB(j, i).getRed()]++;
 			}
 		}
 		for(int i = 0; i < 256; i++) {
-			probabilidades[i] = ((double) veces[i]) / (double) (500*500);
+			probabilidades[i] = ((double) veces[i]) / (double) (image.getWidth()*image.getHeight());
 		}
 		
 		return probabilidades;
@@ -108,15 +114,21 @@ public class Utilities {
 		}
 		
 		int coloranterior= image.getRGB(0, 0).getRed();
-		for(int i = 0; i < 500; i++) {
-			for(int j = 0; j < 500; j++) {
-				int coloractual=image.getRGB(j, i).getRed();;
+		for(int i = 0; i < image.getHeight(); i++) {
+			for(int j = 0; j < image.getWidth(); j++) {
+				int coloractual = 0;
+				try {
+					coloractual=image.getRGB(j, i).getRed();
+				}catch(ArrayIndexOutOfBoundsException e) {
+					System.out.println("i: " + i + " j: " + j);
+				}
+				
 				if(j!=0 || i!=0) {
 					matrizcond[coloractual][coloranterior]++;
 					coloranterior=coloractual;
 				}
 				tiradas[coloranterior]++;
-				if(j==499 && i==499) {
+				if(j==image.getWidth() - 1 && i==image.getHeight() - 1) {
 					tiradas[coloranterior]--;
 				}
 			}
@@ -142,8 +154,8 @@ public class Utilities {
 			repeticiones[i]=0;
 		}
 		
-		for(int j=0;j<500;j++) {
-			for(int i=0;i<500;i++) {
+		for(int j=0;j<img.getHeight();j++) {
+			for(int i=0;i<img.getWidth();i++) {
 				repeticiones[img.getRGB(i, j).getRed()]++;
 			}
 		}
@@ -304,30 +316,89 @@ public class Utilities {
 		return (entrophy >= ht);
 	}
 	
-	public static ArrayList<Byte> encodeImage(ImageParser i, int blocks, double ht){
+	/*
+	 * PARALLEL SECTION
+	 */
+	
+	/*
+	 * parallelEncoder encodes all the image blocks using Huffman's algorithm
+	 */
+	public static ArrayList<Byte> parallelEncoder(ImageParser i, int blocks, int processors) {
+		
+		// number of blocks
+		blocks = i.getWidthInBlocks() * i.getHeightInBlocks();
+		formCompression.progressBar.setMaximum(blocks);
+		// arraylist with the huffman encoded blocks
 		ArrayList<Byte> imageByte = new ArrayList<Byte>();
-		Header h = new Header(blocks);
-		formCompression.progressBar.setValue(20);
+		// create a header for the image
+		Header h = new Header(blocks, i.getWidth(), i.getHeight());
+		// create a pool of threads with available processors
+		if(processors == -1) {
+			processors = Runtime.getRuntime().availableProcessors();
+			System.out.println("Using available processors");
+		}
+		ExecutorService executor = Executors.newFixedThreadPool(processors);
+		ArrayList<Callable<ArrayList<Byte>>> callables = new ArrayList<Callable<ArrayList<Byte>>>();
+		for(int bn = 0; bn < blocks; bn++) {
+			// add block to the encoding queue
+			callables.add(new ParallelEncoder(i.getBlock(bn), h, bn));
+		}
+		// invoke all the tasks
+		List<Future<ArrayList<Byte>>> result = null;
+		try {
+			// Results of the task in the same order as added
+			result = executor.invokeAll(callables);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		if(result != null) {
+			for(Future<ArrayList<Byte>> alb : result) {
+				try {
+					imageByte.addAll(alb.get());
+				} catch (InterruptedException | ExecutionException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		ArrayList<Byte> whole = getHeaderByteCode(h);
+		whole.addAll(imageByte);
+		//formCompression.progressBar.setValue(100);
+		return whole;
+	}
+	/*
+	 * END OF PARALLEL SECTION
+	 */
+	
+	@SuppressWarnings("unused")
+	public static ArrayList<Byte> encodeImageSequential(ImageParser i, int blocks){
+		// number of blocks
+		blocks = i.getWidthInBlocks() * i.getHeightInBlocks();
+		formCompression.progressBar.setMaximum(blocks);
+		
+		ArrayList<Byte> imageByte = new ArrayList<Byte>();
+		Header h = new Header(blocks, i.getWidth(), i.getHeight());
 		for(int j = 0; j < blocks; j++) {
 			// get the block
 			ImageParser b = i.getBlock(j);
-			if(figureOut(Utilities.getEntropiaCMemoria(b), ht)) {
+			//System.out.println("BLOQUE " + j);
+			if(true) {
 				Double[] p = Utilities.getPObjectArray(b);
-				double[] p1 = Utilities.getProbabiliades(b);
-				
 				// Huffman Case
-				System.out.println("El bloque "+ j+ " usa Huffman");
-				ArrayList<Byte> hffmn = Huffman.encode(Huffman.getHuffman(p1), b);
+				//System.out.println("El bloque "+ j + " usa Huffman");
+				ArrayList<Byte> hffmn = Huffman.encode(Huffman.getHuffman(p), b);
 				h.setHuffman(j, p);
 				h.setBlockSizeEncoded(j, hffmn.size());
 				imageByte.addAll(hffmn);
-
-				formCompression.progressBar.setValue(20+j*5);
+				// set width and height of block
+				h.setXY(j, b.getWidth(), b.getHeight());
+				
+				// update progress bar
+				formCompression.progressBar.setValue(formCompression.progressBar.getValue() + 1);
 				
 			}else {
 				// rlc case
 
-				System.out.println("El bloque "+ j+ " usa RLC");
+				System.out.println("El bloque "+ j + " usa RLC");
 				ArrayList<Byte> rlc = RunLenghtC.encode(b);
 				h.setRLC(j);
 				h.setBlockSizeEncoded(j, rlc.size());
@@ -340,14 +411,15 @@ public class Utilities {
 		
 		ArrayList<Byte> whole = getHeaderByteCode(h);
 		whole.addAll(imageByte);
-		formCompression.progressBar.setValue(100);
+		//formCompression.progressBar.setValue(100);
 		return whole;
 	}
+	
+
 	
 	public static BufferedImage decodeImage(ArrayList<Byte> encoded) {		
 		Header header = Utilities.getHeader(encoded);
 		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
-		
 		ArrayList<Integer> decoded = new ArrayList<Integer>();
 
 		formDecompression.progressBar.setValue(20);
@@ -365,7 +437,7 @@ public class Utilities {
 				for(int i = 0; i < probsO.length; i++) {
 					probs[i] = probsO[i];	
 				}
-				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes, header.getBlockSize());
+				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes, header.getBlockSize(blockNumber));
 				decoded.addAll(deco);
 				
 				formDecompression.progressBar.setValue(20+blockNumber*3);
@@ -381,10 +453,10 @@ public class Utilities {
 		
 		//System.out.println("Big image size: " + decoded.size());
 		
-		BufferedImage nuevaImagen = new BufferedImage(2000, 2500, BufferedImage.TYPE_BYTE_GRAY);
+		BufferedImage nuevaImagen = new BufferedImage(header.getWholeX(), header.getWholeY(), BufferedImage.TYPE_BYTE_GRAY);
 		
 		int pixel = 0;
-		
+		/*
 		for(int fila = 0; fila < 2500; fila = fila + 500) {
 			for(int col = 0; col < 2000; col = col + 500) {
 				
@@ -404,7 +476,42 @@ public class Utilities {
 				
 			}
 		}
+		*/
 		
+		// iterate each block
+		// block number
+		int bn = 0;
+		int by = 0;
+		while(by < header.getWholeY()) {
+			int bx = 0;
+			while(bx < header.getWholeX()) {
+				// intert block
+				for(int y = by; y < by + header.getY(bn); y++) {
+					for(int x = bx; x < bx + header.getX(bn); x++) {
+						//System.out.println("algo : " + pixel);
+						int color = 0;
+						try {
+							color = decoded.get(pixel);
+						}catch(IndexOutOfBoundsException e) {
+						}
+						try {
+							nuevaImagen.setRGB(x, y, new Color(color, color, color).getRGB());
+						}catch(ArrayIndexOutOfBoundsException e) {
+							//System.out.println("x " + x + "y " + y);
+						}
+						pixel++;
+					}
+				}
+				// moverme en x hasta la pos del ultimo columna del ultimo bloque
+				bx += header.getX(bn);
+				
+				bn++;
+			}
+			// bajo la cantidad del ultimo bloque metido ya q toda esa fila es del mismo alto
+			by += header.getY(bn - 1);
+		}
+		
+		System.out.println("BLOCK NUMBER: " + bn);
 
 		formDecompression.progressBar.setValue(100);
 		return nuevaImagen;
