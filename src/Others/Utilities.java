@@ -18,13 +18,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 
 import Forms.formCompression;
 import Forms.formDecompression;
 import Huffman.Huffman;
+import Parallel.ParallelDecoder;
 import Parallel.ParallelEncoder;
+import Parallel.ParallelImageGenerator;
 import RunLenght.RunLenghtC;
 
 
@@ -437,7 +440,7 @@ public class Utilities {
 				for(int i = 0; i < probsO.length; i++) {
 					probs[i] = probsO[i];	
 				}
-				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probs), blockBytes, header.getBlockSize(blockNumber));
+				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probsO), blockBytes, header.getBlockSize(blockNumber));
 				decoded.addAll(deco);
 				
 				formDecompression.progressBar.setValue(20+blockNumber*3);
@@ -485,6 +488,13 @@ public class Utilities {
 		while(by < header.getWholeY()) {
 			int bx = 0;
 			while(bx < header.getWholeX()) {
+				
+				// see where each block starts generating the image
+				int where = 0;
+				for(int j = 0; j < bn; j++) {
+					where += (header.getX(bn) * header.getY(bn));
+				}
+				System.out.println("BN " + bn + " starts " + where );
 				// intert block
 				for(int y = by; y < by + header.getY(bn); y++) {
 					for(int x = bx; x < bx + header.getX(bn); x++) {
@@ -516,6 +526,124 @@ public class Utilities {
 		formDecompression.progressBar.setValue(100);
 		return nuevaImagen;
 	}
+	
+	/*
+	 * beginning of parallel decoder
+	 */
+	
+	public static BufferedImage parallelDecoder(ArrayList<Byte> encoded, int processors) {
+		Header header = Utilities.getHeader(encoded);
+		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
+		ArrayList<Integer> decoded = new ArrayList<Integer>();
+
+		formDecompression.progressBar.setMaximum(header.getBlockSizes().length);
+		formDecompression.progressBar.setValue(0);
+		int start = 0;
+		int blockNumber = 0;
+		
+		formDecompression.label.setText("BLOQUES");
+		
+		// create a thread pool
+		ExecutorService executor = Executors.newFixedThreadPool(processors);
+		ArrayList<Callable<ArrayList<Integer>>> callables = new ArrayList<Callable<ArrayList<Integer>>>();
+		
+		// iterate each block
+		for(int c : header.getBlockSizes()) {
+			ArrayList<Byte> blockBytes = new ArrayList<Byte>();
+			// get all the bytes into an arraylist
+			for(int i = start; i < c + start; i++) {
+				blockBytes.add(rawImage.get(i));
+			}
+			// get the probabillities 
+			Double[] probs = header.getProbs(blockNumber);
+			// add the task
+			callables.add(new ParallelDecoder(blockBytes, probs, header.getBlockSize(blockNumber)));
+			start += c;
+			blockNumber++;
+		}
+		// invoke all tasks
+		List<Future<ArrayList<Integer>>> result = null;
+		
+		try {
+			result = executor.invokeAll(callables);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		// get all the results
+		
+		for(Future<ArrayList<Integer>> deco : result) {
+			try {
+				decoded.addAll(deco.get());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+		
+		// once all the results are in the arraylist, generate the image
+		BufferedImage nuevaImagen = new BufferedImage(header.getWholeX(), header.getWholeY(), BufferedImage.TYPE_BYTE_GRAY);
+		
+		formDecompression.label.setText("GENERANDO IMAGEN");
+		formDecompression.progressBar.setValue(0);
+		formDecompression.progressBar.setMaximum(header.getWholeX() * header.getWholeY());
+		
+		// parallelize image generator
+		
+		
+		
+		int pixel = 0;
+		// iterate each block
+		// block number
+		int bn = 0;
+		int by = 0;
+		while(by < header.getWholeY()) {
+			int bx = 0;
+			while(bx < header.getWholeX()) {
+				
+				// see where each block starts generating the image
+				int where = 0;
+				for(int j = 0; j < bn; j++) {
+					where += (header.getX(bn) * header.getY(bn));
+				}
+				
+				// intert block
+				for(int y = by; y < by + header.getY(bn); y++) {
+					for(int x = bx; x < bx + header.getX(bn); x++) {
+						//System.out.println("algo : " + pixel);
+						try {
+							executor.execute(new ParallelImageGenerator(decoded, nuevaImagen, x, y, pixel));
+						}catch(ArrayIndexOutOfBoundsException e) {
+							e.printStackTrace();
+						}
+						pixel++;
+					}
+				}
+				// moverme en x hasta la pos del ultimo columna del ultimo bloque
+				bx += header.getX(bn);
+				bn++;
+			}
+			// bajo la cantidad del ultimo bloque metido ya q toda esa fila es del mismo alto
+			by += header.getY(bn - 1);
+		}
+		
+		executor.shutdown();
+		
+		try {
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return nuevaImagen;
+	}
+	
+	/*
+	 * end of parallel decoder
+	 */
 	
 	//obtains conditional entropies between sent image and received image
 	public static double[] getHi(ImageParser sent, ImageParser received) {

@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 import javax.swing.text.BadLocationException;
 
 import Others.ImageParser;
+import Others.Procesadores;
 import Others.Utilities;
 
 import javax.swing.ImageIcon;
@@ -25,6 +26,9 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JProgressBar;
+import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
+import javax.swing.JTextPane;
 
 public class formDecompression extends JPanel{
 
@@ -41,7 +45,10 @@ public class formDecompression extends JPanel{
 	public static JProgressBar progressBar;
 	private JButton btnGuarfarCompresion;
 	private ArrayList<Byte> decode = null;
+	public static JLabel label;
 	BufferedImage bi;
+	JCheckBox checkBox;
+	JComboBox comboBox;
 
 	/**
 	 * Launch the application.
@@ -84,7 +91,7 @@ public class formDecompression extends JPanel{
 		lblNewLabel = new JLabel("");
 		
 		frame = new JFrame();
-		frame.setBounds(20, 20, 524, 727);
+		frame.setBounds(20, 20, 524, 752);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -117,7 +124,7 @@ public class formDecompression extends JPanel{
 		progressBar.setBounds(16, 64, 490, 29);
 		frame.getContentPane().add(progressBar);
 		
-		lblNewLabel.setBounds(16, 142, 490, 502);
+		lblNewLabel.setBounds(16, 93, 490, 502);
 		frame.getContentPane().add(lblNewLabel);
 		
 		btnGuarfarCompresion = new JButton("Guardar imagen");
@@ -134,7 +141,7 @@ public class formDecompression extends JPanel{
 			}
 		});
 		btnGuarfarCompresion.setEnabled(false);
-		btnGuarfarCompresion.setBounds(305, 657, 199, 25);
+		btnGuarfarCompresion.setBounds(307, 699, 199, 25);
 		frame.getContentPane().add(btnGuarfarCompresion);
 		
 		
@@ -148,7 +155,16 @@ public class formDecompression extends JPanel{
 					public void run() {
 						decode = Utilities.getFileByteCode(origen);
 					    progressBar.repaint();
-						bi = Utilities.decodeImage(decode);
+					    
+					    if(formDecompression.this.checkBox.isSelected()) {
+					    	int pro = ((Procesadores) formDecompression.this.comboBox.getSelectedItem()).getValue();
+					    	if(pro == -1) {
+					    		pro = Runtime.getRuntime().availableProcessors();
+					    	}
+					    	bi = Utilities.parallelDecoder(decode, pro);
+					    }else {
+					    	bi = Utilities.decodeImage(decode);
+					    }
 						formDecompression.this.lblNewLabel.setIcon(new ImageIcon(formDecompression.resize(bi, 500, 625)));
 						btnGuarfarCompresion.setEnabled(true);
 					}
@@ -158,8 +174,39 @@ public class formDecompression extends JPanel{
 				
 			}
 		});
-		btnCrearArchivos.setBounds(26, 657, 199, 25);
+		btnCrearArchivos.setBounds(27, 699, 199, 25);
 		frame.getContentPane().add(btnCrearArchivos);
+		
+		JLabel lblEnProceso = new JLabel("En proceso");
+		lblEnProceso.setBounds(16, 50, 78, 16);
+		frame.getContentPane().add(lblEnProceso);
+		
+		label = new JLabel("- - - -");
+		label.setBounds(97, 50, 259, 16);
+		frame.getContentPane().add(label);
+		
+		JLabel label_1 = new JLabel("Seleccione procesadores:");
+		label_1.setBounds(16, 607, 159, 16);
+		frame.getContentPane().add(label_1);
+		
+		Procesadores[] proce = new Procesadores[201];
+		proce[0] = new Procesadores("Disponibles", -1);
+		for(int i = 1; i <= 200; i++) {
+			proce[i] = new Procesadores(String.valueOf(i), i);
+		}
+		
+		comboBox = new JComboBox(proce);
+		comboBox.setSelectedIndex(0);
+		comboBox.setBounds(187, 603, 71, 27);
+		frame.getContentPane().add(comboBox);
+		
+		checkBox = new JCheckBox("PARALLEL VERSION");
+		checkBox.setBounds(355, 603, 151, 23);
+		frame.getContentPane().add(checkBox);
+		
+		JTextPane textPane = new JTextPane();
+		textPane.setBounds(16, 635, 490, 57);
+		frame.getContentPane().add(textPane);
 	
 	}
 }

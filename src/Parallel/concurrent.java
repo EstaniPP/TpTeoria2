@@ -9,8 +9,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class concurrent {
+	
+	public static void cambiar(Integer x) {
+		x++;
+	}
+	
+	
 	// create a newWorkStealingPool
 	public static void main(String[] args) {
+		
+		int b = 0;
+		System.out.println(b);
+		concurrent.cambiar(b);
+		System.out.println(b);
+		/*
 		long start = System.currentTimeMillis();
 		class Tarea implements Callable{
 			Integer number;
@@ -47,5 +59,6 @@ public class concurrent {
 		}
 		long end = System.currentTimeMillis();
         System.out.println("Tiempo transcurrido: " + (end - start) + "");
+        */
 	}
 }

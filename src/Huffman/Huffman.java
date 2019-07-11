@@ -34,7 +34,7 @@ public class Huffman {
 		return huffmanList.get(0).getCode();
 	}
 	
-	public static Node getHuffmanTree(double[] probabilities) {
+	public static Node getHuffmanTree(Double[] probabilities) {
 
 		LinkedList<Node> huffmanList = new LinkedList<Node>();
 		for(Integer i=0; i<probabilities.length; i++) {
