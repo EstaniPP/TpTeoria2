@@ -51,6 +51,8 @@ public class formCompression extends JPanel{
 	JCheckBox chckbxUserParallelCompression = null;
 	BufferedImage bi;
 	JComboBox comboBox;
+	private JTextField textField_1;
+	private JTextField textField_2;
 
 	/**
 	 * Launch the application.
@@ -93,7 +95,7 @@ public class formCompression extends JPanel{
 		lblNewLabel = new JLabel("");
 		
 		frame = new JFrame();
-		frame.setBounds(20, 20, 524, 764);
+		frame.setBounds(20, 20, 524, 752);
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -148,12 +150,12 @@ public class formCompression extends JPanel{
 			}
 		});
 		btnGuarfarCompresion.setEnabled(false);
-		btnGuarfarCompresion.setBounds(307, 695, 199, 25);
+		btnGuarfarCompresion.setBounds(307, 700, 199, 25);
 		frame.getContentPane().add(btnGuarfarCompresion);
 		
 		JTextPane textPane = new JTextPane();
 		textPane.setEditable(false);
-		textPane.setBounds(16, 657, 267, 68);
+		textPane.setBounds(16, 657, 267, 26);
 		frame.getContentPane().add(textPane);
 		
 		
@@ -181,7 +183,7 @@ public class formCompression extends JPanel{
 					public void run() {
 						long start = System.currentTimeMillis();
 						ImageParser p = new ImageParser(bi);
-						//p.breakItDown(400, 500);
+						p.breakItDown(Integer.valueOf(textField_1.getText()), Integer.valueOf(textField_2.getText()));
 						formCompression.progressBar.setValue(0);
 					    progressBar.setValue(0);
 					    frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -231,6 +233,26 @@ public class formCompression extends JPanel{
 		btnRand.setBounds(459, 26, 65, 29);
 		frame.getContentPane().add(btnRand);
 		
+		JLabel lblBlockSize = new JLabel("Block size:");
+		lblBlockSize.setBounds(16, 684, 159, 16);
+		frame.getContentPane().add(lblBlockSize);
+		
+		textField_1 = new JTextField();
+		textField_1.setBounds(13, 700, 65, 26);
+		frame.getContentPane().add(textField_1);
+		textField_1.setColumns(10);
+		
+		JLabel lblX = new JLabel("X");
+		lblX.setBounds(81, 704, 15, 16);
+		frame.getContentPane().add(lblX);
+		
+		textField_2 = new JTextField();
+		textField_2.setColumns(10);
+		textField_2.setBounds(91, 700, 65, 26);
+		frame.getContentPane().add(textField_2);
+		
+		textField_1.setText("500");
+		textField_2.setText("500");
 		
 	}
 }
