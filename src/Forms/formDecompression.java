@@ -49,6 +49,7 @@ public class formDecompression extends JPanel{
 	BufferedImage bi;
 	JCheckBox checkBox;
 	JComboBox comboBox;
+	JTextPane textPane;
 
 	/**
 	 * Launch the application.
@@ -153,6 +154,7 @@ public class formDecompression extends JPanel{
 
 					@Override
 					public void run() {
+						long start = System.currentTimeMillis();
 						decode = Utilities.getFileByteCode(origen);
 					    progressBar.repaint();
 					    
@@ -162,9 +164,14 @@ public class formDecompression extends JPanel{
 					    		pro = Runtime.getRuntime().availableProcessors();
 					    	}
 					    	bi = Utilities.parallelDecoder(decode, pro);
+					    	long end = System.currentTimeMillis();
+					    	textPane.setText("Tiempo transcurrido (PARALELA CON " + pro + " PROCESADORES): " + (end - start));
 					    }else {
 					    	bi = Utilities.decodeImage(decode);
-					    }
+					    	long end = System.currentTimeMillis();
+					    	textPane.setText("Tiempo transcurrido: " + (end - start));
+					    }					    
+					    
 						formDecompression.this.lblNewLabel.setIcon(new ImageIcon(formDecompression.resize(bi, 500, 625)));
 						btnGuarfarCompresion.setEnabled(true);
 					}
@@ -204,7 +211,7 @@ public class formDecompression extends JPanel{
 		checkBox.setBounds(355, 603, 151, 23);
 		frame.getContentPane().add(checkBox);
 		
-		JTextPane textPane = new JTextPane();
+		textPane = new JTextPane();
 		textPane.setBounds(16, 635, 490, 57);
 		frame.getContentPane().add(textPane);
 	

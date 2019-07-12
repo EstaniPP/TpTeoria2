@@ -10,7 +10,16 @@ public class FatherNode extends Node{
 		this.n1 = n1;
 		this.n2 = n2;
 		this.name = Node.cont++;
-		this.prob = n1.getProb() + n2.getProb();
+		if(n1 != null && n2 != null) {
+			this.prob = n1.getProb() + n2.getProb();
+		}else {
+			if(n1 == null) {
+				this.prob = n2.getProb();
+			}else {
+				this.prob = n1.getProb();
+			}
+		}
+		
 	}
 
 	public HashMap<Integer, ArrayList<Integer>> getCode() {

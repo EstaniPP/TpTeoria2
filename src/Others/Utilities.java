@@ -366,6 +366,7 @@ public class Utilities {
 		ArrayList<Byte> whole = getHeaderByteCode(h);
 		whole.addAll(imageByte);
 		//formCompression.progressBar.setValue(100);
+		executor.shutdown();
 		return whole;
 	}
 	/*
@@ -524,8 +525,9 @@ public class Utilities {
 			by += header.getY(bn - 1);
 		}
 		
-		System.out.println("BLOCK NUMBER: " + bn);
-
+		formDecompression.label.setText("FINALIZADO");
+		
+		
 		return nuevaImagen;
 	}
 	
@@ -671,7 +673,7 @@ public class Utilities {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		formDecompression.label.setText("FINALIZADO");
 		return nuevaImagen;
 	}
 	

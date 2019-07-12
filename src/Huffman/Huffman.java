@@ -16,18 +16,26 @@ public class Huffman {
 		
 		LinkedList<Node> huffmanList = new LinkedList<Node>();
 		
-		
-		int cant = 0;
-		int color = 0;
+
 		for(Integer i=0; i < probabilities.length; i++) {
 			if(probabilities[i] != 0){
 				ChildNode node = new ChildNode((Integer) i, probabilities[i]);
 				huffmanList.add(node);
-				color = i;
-				cant++;
+
 			}
 		}
 		Collections.sort(huffmanList);
+		
+		// delete
+		
+		if(huffmanList.size() == 1) {
+			Node a = huffmanList.remove(0);
+			FatherNode fn = new FatherNode(a, new ChildNode(100 - a.getName(), 0d));
+			huffmanList.add(fn);
+		}
+		
+		// delete
+		
 		
 		while(huffmanList.size() != 1) {
 			Node minor2 = huffmanList.remove(1);
@@ -37,33 +45,29 @@ public class Huffman {
 			Collections.sort(huffmanList);
 		}
 		
-		if(cant == 1 && false) {
-			HashMap<Integer, ArrayList<Integer>> hm = new HashMap<Integer, ArrayList<Integer>>();
-			ArrayList<Integer> ar = new ArrayList<Integer>();
-			ar.add(0);
-			hm.put(color, ar);
-			return hm;
-		}
-		
 		return huffmanList.get(0).getCode();
 	}
 	
 	public static Node getHuffmanTree(Double[] probabilities) {
 
 		LinkedList<Node> huffmanList = new LinkedList<Node>();
-		
-		int cant = 0;
-		int color = 0;
-		
+
 		for(Integer i=0; i<probabilities.length; i++) {
 			if(probabilities[i]!=0){
 				ChildNode node = new ChildNode((Integer)i, probabilities[i]);
 				huffmanList.add(node);
-				cant++;
-				color = i;
+				
 			}
 		}
 		Collections.sort(huffmanList);
+		
+		// delete
+		if(huffmanList.size() == 1) {
+			Node a = huffmanList.remove(0);
+			FatherNode fn = new FatherNode(a, new ChildNode(100 - a.getName(), 0d));
+			huffmanList.add(fn);
+		}
+		// delete
 		
 		while(huffmanList.size() !=1) {
 			Node minor2 = huffmanList.remove(1);
