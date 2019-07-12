@@ -181,6 +181,7 @@ public class formCompression extends JPanel{
 					public void run() {
 						long start = System.currentTimeMillis();
 						ImageParser p = new ImageParser(bi);
+						//p.breakItDown(400, 500);
 						formCompression.progressBar.setValue(0);
 					    progressBar.setValue(0);
 					    frame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

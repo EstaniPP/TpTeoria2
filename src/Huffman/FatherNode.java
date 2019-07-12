@@ -15,7 +15,7 @@ public class FatherNode extends Node{
 
 	public HashMap<Integer, ArrayList<Integer>> getCode() {
 		ArrayList<Integer> array = new ArrayList<Integer>();
-		HashMap<Integer, ArrayList<Integer>> codes=new HashMap<Integer, ArrayList<Integer>>();
+		HashMap<Integer, ArrayList<Integer>> codes = new HashMap<Integer, ArrayList<Integer>>();
 		codes.putAll(this.getCode(array));
 		return codes;
 	}

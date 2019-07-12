@@ -11,7 +11,9 @@ public class ChildNode extends Node{
 	
 	public HashMap<Integer, ArrayList<Integer>> getCode() {
 		HashMap<Integer, ArrayList<Integer>> codes=new HashMap<Integer, ArrayList<Integer>>();
-		codes.put(name, new ArrayList<Integer>());
+		ArrayList<Integer> ar = new ArrayList<Integer>();
+		//ar.add(0);
+		codes.put(name, ar);
 		return codes;
 	}
 	
@@ -27,5 +29,6 @@ public class ChildNode extends Node{
 	protected HashMap<Integer, ArrayList<Integer>> getCode(ArrayList<Integer> previousArray) {
 		HashMap<Integer, ArrayList<Integer>> codes=new HashMap<Integer, ArrayList<Integer>>();
 		codes.put(name,previousArray);
-		return codes;	}
+		return codes;	
+	}
 }

@@ -5,34 +5,48 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import Forms.formDecompression;
+import Others.Header;
 
 public class ParallelImageGenerator implements Runnable{
 
 	BufferedImage nuevaImagen;
-	int x;
-	int y;
-	int pixel;
+	Header header;
+	int where;
 	ArrayList<Integer> decoded;
+	int bn;
+	int bx;
+	int by;
 	
-	public ParallelImageGenerator(ArrayList<Integer> decoded, BufferedImage nuevaImagen, int x, int y, int pixel) {
+	public ParallelImageGenerator(ArrayList<Integer> decoded, BufferedImage nuevaImagen, int where, Header header, int bn, int bx, int by) {
 		this.nuevaImagen = nuevaImagen;
-		this.x = x;
-		this.y = y;
-		this.pixel = pixel;
+		this.where = where;
 		this.decoded = decoded;
+		this.header = header;
+		this.bn = bn;
+		this.by = by;
+		this.bx = bx;
 	}
 	@Override
 	public void run() {
-		int color = 0;
-		try {
-			color = decoded.get(pixel);
-		}catch(IndexOutOfBoundsException e) {
-			e.printStackTrace();
+		
+		// intert block
+		for(int y = by; y < by + header.getY(bn); y++) {
+			for(int x = bx; x < bx + header.getX(bn); x++) {
+				int color = 0;
+				try {
+					color = decoded.get(where);
+				}catch(IndexOutOfBoundsException e) {
+					e.printStackTrace();
+				}
+				nuevaImagen.setRGB(x, y, new Color(color, color, color).getRGB());
+				where++;
+			}
 		}
-		nuevaImagen.setRGB(x, y, new Color(color, color, color).getRGB());
+		
 		synchronized(formDecompression.progressBar) {
 			formDecompression.progressBar.setValue(formDecompression.progressBar.getValue() + 1);
 		}
+		
 	}
 
 }

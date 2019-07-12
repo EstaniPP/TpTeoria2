@@ -15,20 +15,34 @@ public class Huffman {
 	public static HashMap<Integer, ArrayList<Integer>> getHuffman(Double[] probabilities) {
 		
 		LinkedList<Node> huffmanList = new LinkedList<Node>();
-		for(Integer i=0; i<probabilities.length; i++) {
-			if(probabilities[i]!=0){
-				ChildNode node = new ChildNode((Integer)i, probabilities[i]);
+		
+		
+		int cant = 0;
+		int color = 0;
+		for(Integer i=0; i < probabilities.length; i++) {
+			if(probabilities[i] != 0){
+				ChildNode node = new ChildNode((Integer) i, probabilities[i]);
 				huffmanList.add(node);
+				color = i;
+				cant++;
 			}
 		}
 		Collections.sort(huffmanList);
 		
-		while(huffmanList.size() !=1) {
+		while(huffmanList.size() != 1) {
 			Node minor2 = huffmanList.remove(1);
 			Node minor1 = huffmanList.remove(0);
 			FatherNode n = new FatherNode(minor1,minor2);
 			huffmanList.add(n);
 			Collections.sort(huffmanList);
+		}
+		
+		if(cant == 1 && false) {
+			HashMap<Integer, ArrayList<Integer>> hm = new HashMap<Integer, ArrayList<Integer>>();
+			ArrayList<Integer> ar = new ArrayList<Integer>();
+			ar.add(0);
+			hm.put(color, ar);
+			return hm;
 		}
 		
 		return huffmanList.get(0).getCode();
@@ -37,10 +51,16 @@ public class Huffman {
 	public static Node getHuffmanTree(Double[] probabilities) {
 
 		LinkedList<Node> huffmanList = new LinkedList<Node>();
+		
+		int cant = 0;
+		int color = 0;
+		
 		for(Integer i=0; i<probabilities.length; i++) {
 			if(probabilities[i]!=0){
-				ChildNode node = new ChildNode((Integer)i,probabilities[i]);
+				ChildNode node = new ChildNode((Integer)i, probabilities[i]);
 				huffmanList.add(node);
+				cant++;
+				color = i;
 			}
 		}
 		Collections.sort(huffmanList);
@@ -104,6 +124,7 @@ public class Huffman {
 	  * @return ArrayList<Integer> - decoded
 	*/
 	
+	@SuppressWarnings("unused")
 	public static ArrayList<Integer> decode(Node hTree, ArrayList<Byte> bytes, int blockSize) {
 		// initialize araylist
 		ArrayList<Integer> ret = new ArrayList<Integer>();
@@ -123,6 +144,7 @@ public class Huffman {
 					ret.add(tempNode.getName());
 					qty++;
 					tempNode = hTree;
+					//bufferPos++;
 				}else {
 					if((b & mask) == mask) {
 						// it is a 1 -> lets get the node's right child

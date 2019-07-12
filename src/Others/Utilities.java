@@ -71,7 +71,7 @@ public class Utilities {
 			}
 		}
 		for(int i = 0; i < 256; i++) {
-			probabilidades[i] = ((double) veces[i]) / (double) (image.getWidth()*image.getHeight());
+			probabilidades[i] = ((double) veces[i]) / (double) (image.getWidth() * image.getHeight());
 		}
 		
 		return probabilidades;
@@ -420,12 +420,17 @@ public class Utilities {
 	
 
 	
-	public static BufferedImage decodeImage(ArrayList<Byte> encoded) {		
+	public static BufferedImage decodeImage(ArrayList<Byte> encoded) {	
+
+		
 		Header header = Utilities.getHeader(encoded);
 		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
 		ArrayList<Integer> decoded = new ArrayList<Integer>();
-
-		formDecompression.progressBar.setValue(20);
+		
+		formDecompression.label.setText("BLOQUES");
+		formDecompression.progressBar.setValue(0);
+		formDecompression.progressBar.setMaximum(header.getBlockSizes().length);
+		
 		int start = 0;
 		int blockNumber = 0;
 		for(int c : header.getBlockSizes()) {
@@ -443,7 +448,7 @@ public class Utilities {
 				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probsO), blockBytes, header.getBlockSize(blockNumber));
 				decoded.addAll(deco);
 				
-				formDecompression.progressBar.setValue(20+blockNumber*3);
+				formDecompression.progressBar.setValue(formDecompression.progressBar.getValue() + 1);
 				
 			}else {
 				// rlc
@@ -482,19 +487,15 @@ public class Utilities {
 		*/
 		
 		// iterate each block
+		
+		formDecompression.label.setText("GENERANDO IMAGEN");
+		formDecompression.progressBar.setValue(0);
 		// block number
 		int bn = 0;
 		int by = 0;
 		while(by < header.getWholeY()) {
 			int bx = 0;
 			while(bx < header.getWholeX()) {
-				
-				// see where each block starts generating the image
-				int where = 0;
-				for(int j = 0; j < bn; j++) {
-					where += (header.getX(bn) * header.getY(bn));
-				}
-				System.out.println("BN " + bn + " starts " + where );
 				// intert block
 				for(int y = by; y < by + header.getY(bn); y++) {
 					for(int x = bx; x < bx + header.getX(bn); x++) {
@@ -516,6 +517,8 @@ public class Utilities {
 				bx += header.getX(bn);
 				
 				bn++;
+				
+				formDecompression.progressBar.setValue(formDecompression.progressBar.getValue() + 1);
 			}
 			// bajo la cantidad del ultimo bloque metido ya q toda esa fila es del mismo alto
 			by += header.getY(bn - 1);
@@ -523,7 +526,6 @@ public class Utilities {
 		
 		System.out.println("BLOCK NUMBER: " + bn);
 
-		formDecompression.progressBar.setValue(100);
 		return nuevaImagen;
 	}
 	
@@ -588,7 +590,7 @@ public class Utilities {
 		
 		formDecompression.label.setText("GENERANDO IMAGEN");
 		formDecompression.progressBar.setValue(0);
-		formDecompression.progressBar.setMaximum(header.getWholeX() * header.getWholeY());
+		formDecompression.progressBar.setMaximum(header.getBlockSizes().length);
 		
 		// parallelize image generator
 		
@@ -596,7 +598,47 @@ public class Utilities {
 		
 		int pixel = 0;
 		// iterate each block
+		
+		/*
 		// block number
+				int bn = 0;
+				int by = 0;
+				while(by < header.getWholeY()) {
+					int bx = 0;
+					while(bx < header.getWholeX()) {
+						// intert block
+						for(int y = by; y < by + header.getY(bn); y++) {
+							for(int x = bx; x < bx + header.getX(bn); x++) {
+								//System.out.println("algo : " + pixel);
+								int color = 0;
+								try {
+									color = decoded.get(pixel);
+								}catch(IndexOutOfBoundsException e) {
+								}
+								try {
+									nuevaImagen.setRGB(x, y, new Color(color, color, color).getRGB());
+								}catch(ArrayIndexOutOfBoundsException e) {
+									//System.out.println("x " + x + "y " + y);
+								}
+								pixel++;
+							}
+						}
+						// moverme en x hasta la pos del ultimo columna del ultimo bloque
+						bx += header.getX(bn);
+						
+						bn++;
+						
+						formDecompression.progressBar.setValue(formDecompression.progressBar.getValue() + 1);
+					}
+					// bajo la cantidad del ultimo bloque metido ya q toda esa fila es del mismo alto
+					by += header.getY(bn - 1);
+				}
+				
+		*/
+		// block number
+		
+		
+		
 		int bn = 0;
 		int by = 0;
 		while(by < header.getWholeY()) {
@@ -606,21 +648,13 @@ public class Utilities {
 				// see where each block starts generating the image
 				int where = 0;
 				for(int j = 0; j < bn; j++) {
-					where += (header.getX(bn) * header.getY(bn));
+					where += (header.getX(j) * header.getY(j));
 				}
 				
-				// intert block
-				for(int y = by; y < by + header.getY(bn); y++) {
-					for(int x = bx; x < bx + header.getX(bn); x++) {
-						//System.out.println("algo : " + pixel);
-						try {
-							executor.execute(new ParallelImageGenerator(decoded, nuevaImagen, x, y, pixel));
-						}catch(ArrayIndexOutOfBoundsException e) {
-							e.printStackTrace();
-						}
-						pixel++;
-					}
-				}
+				// de donde a donde decodifico
+				
+				
+				executor.execute(new ParallelImageGenerator(decoded, nuevaImagen, where, header, bn, bx, by));
 				// moverme en x hasta la pos del ultimo columna del ultimo bloque
 				bx += header.getX(bn);
 				bn++;
