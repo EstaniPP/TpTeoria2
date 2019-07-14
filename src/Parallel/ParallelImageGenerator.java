@@ -25,6 +25,8 @@ public class ParallelImageGenerator implements Runnable{
 		this.bn = bn;
 		this.by = by;
 		this.bx = bx;
+		System.out.println("GENERATING: " + bn);
+		
 	}
 	@Override
 	public void run() {
@@ -46,6 +48,7 @@ public class ParallelImageGenerator implements Runnable{
 		synchronized(formDecompression.progressBar) {
 			formDecompression.progressBar.setValue(formDecompression.progressBar.getValue() + 1);
 		}
+		System.out.println("END: " + bn);
 		
 	}
 

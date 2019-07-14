@@ -26,6 +26,7 @@ import Forms.formCompression;
 import Forms.formDecompression;
 import Huffman.Huffman;
 import Parallel.ParallelDecoder;
+import Parallel.ParallelDecoder2;
 import Parallel.ParallelEncoder;
 import Parallel.ParallelImageGenerator;
 import RunLenght.RunLenghtC;
@@ -422,7 +423,7 @@ public class Utilities {
 
 	
 	public static BufferedImage decodeImage(ArrayList<Byte> encoded) {	
-
+		long inicio = System.currentTimeMillis(); 
 		
 		Header header = Utilities.getHeader(encoded);
 		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
@@ -442,10 +443,7 @@ public class Utilities {
 			if(header.getEncoder(blockNumber)) {
 				// huffman
 				Double[] probsO = header.getProbs(blockNumber);
-				double[] probs = new double[probsO.length];
-				for(int i = 0; i < probsO.length; i++) {
-					probs[i] = probsO[i];	
-				}
+				
 				ArrayList<Integer> deco = Huffman.decode(Huffman.getHuffmanTree(probsO), blockBytes, header.getBlockSize(blockNumber));
 				decoded.addAll(deco);
 				
@@ -486,6 +484,8 @@ public class Utilities {
 			}
 		}
 		*/
+		long fin = System.currentTimeMillis(); 
+		formDecompression.textPane.setText("Tiempo transcurrido en decompresion: " + (fin - inicio));
 		
 		// iterate each block
 		
@@ -536,7 +536,9 @@ public class Utilities {
 	 */
 	
 	public static BufferedImage parallelDecoder(ArrayList<Byte> encoded, int processors) {
+		formDecompression.label.setText("OBTENIENDO HEADER");
 		Header header = Utilities.getHeader(encoded);
+		formDecompression.label.setText("OBTENIENDO CODIFICACION");
 		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
 		ArrayList<Integer> decoded = new ArrayList<Integer>();
 
@@ -545,12 +547,19 @@ public class Utilities {
 		int start = 0;
 		int blockNumber = 0;
 		
-		formDecompression.label.setText("BLOQUES");
 		
 		// create a thread pool
+		formDecompression.label.setText("CREANDO POOL DE THREADS");
 		ExecutorService executor = Executors.newFixedThreadPool(processors);
 		ArrayList<Callable<ArrayList<Integer>>> callables = new ArrayList<Callable<ArrayList<Integer>>>();
 		
+		formDecompression.label.setText("CREANDO LIENZO");
+		// once all the results are in the arraylist, generate the image
+		BufferedImage nuevaImagen = new BufferedImage(header.getWholeX(), header.getWholeY(), BufferedImage.TYPE_BYTE_GRAY);
+		
+		//Integer[] deco = new Integer[header.getWholeX() * header.getWholeY()];
+		
+		formDecompression.label.setText("ITERANDO BLOQUES");
 		// iterate each block
 		for(int c : header.getBlockSizes()) {
 			ArrayList<Byte> blockBytes = new ArrayList<Byte>();
@@ -561,13 +570,12 @@ public class Utilities {
 			// get the probabillities 
 			Double[] probs = header.getProbs(blockNumber);
 			// add the task
-			callables.add(new ParallelDecoder(blockBytes, probs, header.getBlockSize(blockNumber)));
+			callables.add(new ParallelDecoder(blockBytes, probs, blockNumber, header, nuevaImagen));
 			start += c;
 			blockNumber++;
 		}
 		// invoke all tasks
 		List<Future<ArrayList<Integer>>> result = null;
-		
 		try {
 			result = executor.invokeAll(callables);
 		} catch (InterruptedException e) {
@@ -575,11 +583,12 @@ public class Utilities {
 			e.printStackTrace();
 		}
 		
+		formDecompression.label.setText("OBTENIENDO RESULTADOS PARCIALES");
 		// get all the results
-		
-		for(Future<ArrayList<Integer>> deco : result) {
+		for(Future<ArrayList<Integer>> decod : result) {
 			try {
-				decoded.addAll(deco.get());
+				decoded.addAll(decod.get());
+				//decod.get();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			} catch (ExecutionException e) {
@@ -587,8 +596,6 @@ public class Utilities {
 			}
 		}
 		
-		// once all the results are in the arraylist, generate the image
-		BufferedImage nuevaImagen = new BufferedImage(header.getWholeX(), header.getWholeY(), BufferedImage.TYPE_BYTE_GRAY);
 		
 		formDecompression.label.setText("GENERANDO IMAGEN");
 		formDecompression.progressBar.setValue(0);
@@ -599,6 +606,44 @@ public class Utilities {
 		
 		
 		int pixel = 0;
+		
+		// block number
+				int bn = 0;
+				int by = 0;
+				while(by < header.getWholeY()) {
+					int bx = 0;
+					while(bx < header.getWholeX()) {
+						// intert block
+						for(int y = by; y < by + header.getY(bn); y++) {
+							for(int x = bx; x < bx + header.getX(bn); x++) {
+								//System.out.println("algo : " + pixel);
+								int color = 0;
+								try {
+									color = decoded.get(pixel);
+									//color = deco[pixel];
+								}catch(IndexOutOfBoundsException e) {
+								}
+								try {
+									nuevaImagen.setRGB(x, y, new Color(color, color, color).getRGB());
+								}catch(ArrayIndexOutOfBoundsException e) {
+									//System.out.println("x " + x + "y " + y);
+								}
+								pixel++;
+							}
+						}
+						// moverme en x hasta la pos del ultimo columna del ultimo bloque
+						bx += header.getX(bn);
+						
+						bn++;
+						
+						formDecompression.progressBar.setValue(formDecompression.progressBar.getValue() + 1);
+					}
+					// bajo la cantidad del ultimo bloque metido ya q toda esa fila es del mismo alto
+					by += header.getY(bn - 1);
+				}
+				
+		
+		
 		// iterate each block
 		
 		/*
@@ -639,7 +684,7 @@ public class Utilities {
 		*/
 		// block number
 		
-		
+		/*
 		
 		int bn = 0;
 		int by = 0;
@@ -665,14 +710,130 @@ public class Utilities {
 			by += header.getY(bn - 1);
 		}
 		
+		formDecompression.label.setText("APAGANDO EJECUTOR");
+		*/
 		executor.shutdown();
-		
+		formDecompression.label.setText("ESPERANDO A QUE TERMINEN TODAS LAS TAREAS");
+		/*
 		try {
 			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}*/
+		formDecompression.label.setText("FINALIZADO");
+		return nuevaImagen;
+	}
+	public static BufferedImage parallelDecoder2(ArrayList<Byte> encoded, int processors) {
+		long inicio = System.currentTimeMillis();
+    	
+		formDecompression.label.setText("OBTENIENDO HEADER");
+		Header header = Utilities.getHeader(encoded);
+		formDecompression.label.setText("OBTENIENDO CODIFICACION");
+		ArrayList<Byte> rawImage = Utilities.getNoHeader(encoded);
+
+		formDecompression.progressBar.setMaximum(header.getBlockSizes().length);
+		formDecompression.progressBar.setValue(0);
+		int start = 0;
+		int blockNumber = 0;
+		
+		
+		// create a thread pool
+		formDecompression.label.setText("CREANDO POOL DE THREADS");
+		ExecutorService executor = Executors.newFixedThreadPool(processors);
+		
+		formDecompression.label.setText("CREANDO LIENZO");
+		// once all the results are in the arraylist, generate the image
+		BufferedImage nuevaImagen = new BufferedImage(header.getWholeX(), header.getWholeY(), BufferedImage.TYPE_BYTE_GRAY);
+		
+		Integer[] decodificada = new Integer[header.getWholeX() * header.getWholeY()];
+		
+		formDecompression.label.setText("ITERANDO BLOQUES");
+		// iterate each block
+		for(int c : header.getBlockSizes()) {
+			ArrayList<Byte> blockBytes = new ArrayList<Byte>();
+			// get all the bytes into an arraylist
+			for(int i = start; i < c + start; i++) {
+				blockBytes.add(rawImage.get(i));
+			}
+			// get the probabillities 
+			Double[] probs = header.getProbs(blockNumber);
+			// add the task
+			executor.submit(new ParallelDecoder2(blockBytes, probs, blockNumber, header, nuevaImagen, decodificada));
+			start += c;
+			blockNumber++;
 		}
+		
+		
+		formDecompression.label.setText("OBTENIENDO RESULTADOS PARCIALES");
+		
+		
+		
+		formDecompression.label.setText("GENERANDO IMAGEN");
+		formDecompression.progressBar.setValue(0);
+		formDecompression.progressBar.setMaximum(header.getBlockSizes().length);
+		
+		// parallelize image generator
+		
+		formDecompression.label.setText("APAGANDO EJECUTOR");
+
+		executor.shutdown();
+		formDecompression.label.setText("ESPERANDO A QUE TERMINEN TODAS LAS TAREAS");
+		
+		try {
+			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long fin = System.currentTimeMillis(); 
+		formDecompression.textPane.setText("Tiempo transcurrido en decompresion: " + (fin - inicio));
+		
+		int pixel = 0;
+		
+		// block number
+				int bn = 0;
+				int by = 0;
+				while(by < header.getWholeY()) {
+					int bx = 0;
+					while(bx < header.getWholeX()) {
+						// intert block
+						for(int y = by; y < by + header.getY(bn); y++) {
+							for(int x = bx; x < bx + header.getX(bn); x++) {
+								//System.out.println("algo : " + pixel);
+								int color = 0;
+								try {
+									//color = decoded.get(pixel);
+									color = decodificada[pixel];
+								}catch(NullPointerException e) {
+									System.out.println("ERROR EN PIXEL " + pixel);
+								}
+								try {
+									nuevaImagen.setRGB(x, y, new Color(color, color, color).getRGB());
+								}catch(ArrayIndexOutOfBoundsException e) {
+									//System.out.println("x " + x + "y " + y);
+								}
+								pixel++;
+							}
+						}
+						// moverme en x hasta la pos del ultimo columna del ultimo bloque
+						bx += header.getX(bn);
+						
+						bn++;
+						
+						formDecompression.progressBar.setValue(formDecompression.progressBar.getValue() + 1);
+					}
+					// bajo la cantidad del ultimo bloque metido ya q toda esa fila es del mismo alto
+					by += header.getY(bn - 1);
+				}
+				
+		
+		
+		// iterate each block
+		
+		
+		
+		
 		formDecompression.label.setText("FINALIZADO");
 		return nuevaImagen;
 	}
